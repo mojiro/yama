@@ -1,0 +1,25 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:     22
+    mt_username: admin
+    mt_pkeyfile: /home/admin/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Set Value
+      mikrotik_ssh_set:
+        hostname:   "{{ inventory_hostname }}"
+        port:       "{{ mt_port }}"
+        username:   "{{ mt_username }}"
+        pkeyfile:   "{{ mt_pkeyfile }}"
+        branch:     /ip dns
+        action:     set
+        propvals:   servers=1.1.1.1,1.0.0.1
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

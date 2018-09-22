@@ -1,0 +1,30 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:     22
+    mt_username: admin
+    mt_pkeyfile: /home/admin/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Fotos
+      mikrotik_ssh_commands:
+        hostname:   "{{ inventory_hostname }}"
+        port:       "{{ mt_port }}"
+        username:   "{{ mt_username }}"
+        pkeyfile:   "{{ mt_pkeyfile }}"
+        commands:
+          - /user group add name=ftp policy=ftp,read,write
+          - /user add name=ftpuser password=ftpuser group=ftp
+          - /ip address add address=192.168.1.11 interface=ether1 network=192.168.1.0
+          - /ip service set ftp address=192.168.1.0/24 port=21 disabled=no
+          - /ip smb set domain=EXAMPLECOM enabled=yes interfaces=ether1
+          - /ip smb shares add directory=/disk1/shares name=shares
+          - /ip smb users add name=ftp password=ftp read-only=yes
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result
