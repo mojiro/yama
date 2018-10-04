@@ -51,15 +51,13 @@ def main():
                                   ifnull(module.params['find'], ''))
 
         if result:
-            if router.store(module.params['branch'], result):
-                changed = 1
-
-    router.disconnect()
+            router.store(module.params['branch'], result)
 
     if router.errc():
-        messages.append(router.errors())
         failed = 1
 
+    router.disconnect()
+    messages.append(router.errors())
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 

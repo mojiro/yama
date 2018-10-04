@@ -33,12 +33,11 @@ def main():
         if inventory.addhost(module.params['hostname']):
             changed = 1
 
-    inventory.disconnect()
-
     if inventory.errc():
-        messages.append(inventory.errors())
         failed = 1
 
+    inventory.disconnect()
+    messages.append(inventory.errors())
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 

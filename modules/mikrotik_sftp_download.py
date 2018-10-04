@@ -46,12 +46,11 @@ def main():
         unreachable = 0
         result = router.download(module.params['remote'], module.params['local'])
 
-    router.disconnect()
-
     if router.errc():
-        messages.append(router.errors())
         failed = 1
 
+    router.disconnect()
+    messages.append(router.errors())
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 

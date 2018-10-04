@@ -50,19 +50,14 @@ def main():
                                 module.params['raw'])
 
         if result and module.params['output']:
-            if tofile(module.params['output'], result):
-                changed = 1
-            else:
+            if not tofile(module.params['output'], result):
                 messages.append('Unable to create Output File.')
 
-    router.disconnect()
-
     if router.errc():
-        messages.append(router.errors())
-
-    if messages:
         failed = 1
 
+    router.disconnect()
+    messages.append(router.errors())
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 
