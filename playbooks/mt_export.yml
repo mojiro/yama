@@ -11,7 +11,7 @@
 
   tasks:
     - name: Mikrotik - Command
-      mikrotik_ssh_command:
+      mikrotik_ssh_commands:
         hostname:  "{{ inventory_hostname }}"
         port:      "{{ mt_port }}"
         username:  "{{ mt_username }}"

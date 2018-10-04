@@ -4,10 +4,9 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-""" Executes list of commands """
+""" Executes list of commands. Optionally outputs the results to file. """
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network.mikrotik.valid import hasstring, haslist
 from ansible.module_utils.network.mikrotik.strings import tofile
 import ansible.module_utils.network.mikrotik.mikrotik as mikrotik
 
@@ -30,6 +29,7 @@ def main():
             branchfile=dict(required=False, default='mikrotik/branch.json'),
             db_conffile=dict(required=False, default='mikrotik/mongodb.json'),
             commands=dict(required=True), #, type='list'),
+            raw=dict(required=False, default=False),
             output=dict(required=False)
         )
     )
@@ -46,7 +46,8 @@ def main():
 
     if router.connect():
         unreachable = 0
-        result = router.commands(module.params['commands'])
+        result = router.commands(module.params['commands'],
+                                 module.params['raw'])
 
         if result and module.params['output']:
             if not tofile(module.params['output'], result):
