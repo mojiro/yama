@@ -17,7 +17,7 @@ import ansible.module_utils.network.mikrotik.mongodb as mongodb
 from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, haslist, \
     hasdict, haskey, isdir, isfile, isport, ishostname, isusername
-from ansible.module_utils.network.mikrotik.strings import loadjson
+from ansible.module_utils.network.mikrotik.strings import readjson
 from ansible.module_utils.network.mikrotik.mikrotik_helpers import branchfix, \
     properties_to_list, propvals_to_dict, propvals_diff_getvalues
 
@@ -66,7 +66,7 @@ class Router(ErrorObject):
         else:
             self.err(4, password + ', ' + pkeyfile)
 
-        self.branch = loadjson(branchfile)
+        self.branch = readjson(branchfile)
         if not self.branch:
             self.err(5, branchfile)
 

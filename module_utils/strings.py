@@ -82,28 +82,10 @@ def csv_parse(lines):
         return None
 
 
-def loadjson(path):
-    """ Load JSON file
-
-    :param path: Path of JSON file to load
-    :returns: (dict) Dictionary with the JSON file contents
-    """
-    results = None
-    if isfile(path):
-        try:
-            handler = open(path)
-            results = json.load(handler)
-            handler.close()
-        except Exception:
-            getexcept()
-    return results
-
-
-def readfile(filename, decode64=False):
-    """Read file from disk, optionally decodes it from base64
+def readfile(filename):
+    """Read file from disk
 
     :param filename: (str) Filename
-    :param decode64: (bool) If true, file contents will be decoded by base64
     :return: (str) File contents, if fails returns None
     """
     if not isfile(filename):
@@ -111,11 +93,9 @@ def readfile(filename, decode64=False):
     results = None
     try:
         with open(filename) as handler:
-            results = handler.read().strip()
+            results = handler.read()
     except IOError:
         return None
-    if decode64:
-        results = str(base64.b64decode(results), 'utf-8')
     return results
 
 
@@ -131,23 +111,6 @@ def readjson(filename):
     try:
         with open(filename) as handler:
             results = json.load(handler)
-    except (IOError, ValueError):
-        return None
-    return results
-
-
-def readyaml(filename):
-    """Loads the YAML file into a dictionary
-
-    :param filename: (str) Filename to load YAML from
-    :return: (dict) File contents in dict, None if fails
-    """
-    if not isfile(filename):
-        return None
-    results = None
-    try:
-        with open(filename) as handler:
-            results = yaml.load(handler)
     except (IOError, ValueError):
         return None
     return results

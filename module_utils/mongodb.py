@@ -11,7 +11,7 @@ from ansible.module_utils.network.mikrotik.object_error import ErrorObject
 from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, hasdict, \
     ishost, isport, ishostname, isusername
-from ansible.module_utils.network.mikrotik.strings import loadjson
+from ansible.module_utils.network.mikrotik.strings import readjson
 
 
 class Database(ErrorObject):
@@ -31,7 +31,7 @@ class Database(ErrorObject):
         """
         super(Database, self).__init__()
 
-        contents = loadjson(conffile)
+        contents = readjson(conffile)
 
         if hasdict(contents):
             if 'hostname' in contents:
