@@ -234,7 +234,6 @@ class Router(ErrorObject):
     def command(self, command, raw=False, connect=True, hasstdout=True):
         """
         """
-        results = None
         status = 0
 
         if not hasstring(command):
@@ -282,23 +281,46 @@ class Router(ErrorObject):
 
         return results
 
-    def commands(self, commands):
+    def commands(self, commands, raw=False, connect=True):
         """
         """
-        if not haslist(commands):
+        status = 0
+
+        if hasstring(commands):
+            commands = [commands]
+            # maybe if it is only one command, exec it and skip to end
+        elif not haslist(commands):
             self.err(1)
             return None
 
+        if self.status < 1 and connect:
+            if self.connect():
+                status = 1
+
+        if self.status < 1:
+            self.err(2, self.status)
+            return None
+
+        results = []
+
         for index, command in enumerate(commands):
-            result = self.command(command, hasstdout=False)
+            if not command:
+                continue
+
+            result = self.command(command, raw, hasstdout=False)
+            results.append(result)
 
             if self.errc():
                 if haslist(result):
+                    # move the following check to self.command
                     if self.checkline_falsepos(result[0]):
                         self.err0()
                         continue
 
                 return self.err(2, 'commands[' + str(index) + ']: ' + command)
+
+        if status == 1:
+            self.disconnect()
 
         return True
 
@@ -414,7 +436,7 @@ class Router(ErrorObject):
                     find_command = '[find ' + find + '] '
                 else:
                     iid = False
-                    find_command = find
+                    find_command = find + ' '
 
         # Get values before updates
         getvalues0 = self.getvalues(branch, properties, find, False, iid)
@@ -429,12 +451,13 @@ class Router(ErrorObject):
         command = branch + ' set ' + find_command + propvals
         results = self.command(command, hasstdout=False)
         if results:
-            return self.err(6, results)
+            self.err(6, command)
+            return self.err(7, results)
 
         # Get values after update
-        getvalues1 = self.getvalues(branch, properties, find, False, True)
+        getvalues1 = self.getvalues(branch, properties, find, False, iid)
         if not getvalues1:
-            return self.err(7)
+            return self.err(8)
 
         # Compare Before and After update command
         if getvalues0 != getvalues1:
@@ -487,13 +510,14 @@ class Router(ErrorObject):
             if self.checkline_falsepos(results[0]):
                 self.err0()
                 return False  # Not changed != Failed
-            return self.err(5, results)
+            self.err(5, command)
+            return self.err(6, results)
 
         # Count entries after add command
         command = ':put [:len [' + branch + ' find]]'
         entries_c1 = self.command(command)
         if not entries_c1:
-            return self.err(6)
+            return self.err(7)
 
         # Compare Before and After add command
         if entries_c0 != entries_c1:
