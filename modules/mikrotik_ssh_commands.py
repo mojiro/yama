@@ -7,6 +7,8 @@
 """ Executes list of commands """
 
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.network.mikrotik.valid import hasstring, haslist
+from ansible.module_utils.network.mikrotik.strings import tofile
 import ansible.module_utils.network.mikrotik.mikrotik as mikrotik
 
 PATH = '/etc/ansible/config'
@@ -27,7 +29,8 @@ def main():
             pkeyfile=dict(required=False),
             branchfile=dict(required=False, default='mikrotik/branch.json'),
             db_conffile=dict(required=False, default='mikrotik/mongodb.json'),
-            commands=dict(required=True, type='list')
+            commands=dict(required=True), #, type='list'),
+            output=dict(required=False)
         )
     )
 
@@ -45,12 +48,15 @@ def main():
         unreachable = 0
         result = router.commands(module.params['commands'])
 
-    router.disconnect()
+        if result and module.params['output']:
+            if not tofile(module.params['output'], result):
+                messages.append('Unable to create Output File.')
 
     if router.errc():
-        messages.append(router.errors())
         failed = 1
 
+    router.disconnect()
+    messages.append(router.errors())
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 
