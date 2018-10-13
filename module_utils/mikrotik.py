@@ -60,19 +60,13 @@ class Router(ErrorObject):
         else:
             self.err(3, username)
 
-        if hasstring(password) or isfile(pkeyfile):
-            self.password = password
-            self.pkeyfile = pkeyfile
-        else:
-            self.err(4, password + ', ' + pkeyfile)
-
         self.branch = readjson(branchfile)
         if not self.branch:
-            self.err(5, branchfile)
+            self.err(4, branchfile)
 
         self.inventory = mongodb.Database(db_conffile)
         if self.inventory.status < 0:
-            self.err(6, self.inventory.errors())
+            self.err(5, self.inventory.errors())
 
         if self.errc() == 0:
             self.status = 0
@@ -154,19 +148,39 @@ class Router(ErrorObject):
                 return True
 
         try:
-            self.pkey = paramiko.RSAKey.from_private_key_file(self.pkeyfile)
+            if self.pkeyfile:
+                self.pkey = paramiko.RSAKey.from_private_key_file(self.pkeyfile)
 
-            if protocol == 'sftp':
-                self.transport = paramiko.Transport((self.hostname, self.port))
-                self.transport.connect(username=self.username, pkey=self.pkey)
-                self.connection = paramiko.SFTPClient.from_transport(self.transport)
+                if protocol == 'sftp':
+                    self.transport = paramiko.Transport((self.hostname, self.port))
+                    self.transport.connect(username=self.username,
+                                           pkey=self.pkey)
+                    self.connection = paramiko.SFTPClient.from_transport(self.transport)
+
+                else:
+                    self.connection = paramiko.SSHClient()
+                    self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    self.connection.connect(hostname=self.hostname,
+                                            port=self.port,
+                                            username=self.username,
+                                            pkey=self.pkey,
+                                            timeout=timeout)
 
             else:
-                self.connection = paramiko.SSHClient()
-                self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                self.connection.connect(hostname=self.hostname, port=self.port,
-                                        username=self.username, pkey=self.pkey,
-                                        timeout=timeout)
+                if protocol == 'sftp':
+                    self.transport = paramiko.Transport((self.hostname, self.port))
+                    self.transport.connect(username=self.username,
+                                           password=self.password)
+                    self.connection = paramiko.SFTPClient.from_transport(self.transport)
+
+                else:
+                    self.connection = paramiko.SSHClient()
+                    self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    self.connection.connect(hostname=self.hostname,
+                                            port=self.port,
+                                            username=self.username,
+                                            password=self.password,
+                                            timeout=timeout)
 
             self.status = 1
             return True
@@ -253,11 +267,13 @@ class Router(ErrorObject):
         try:
             stdin, stdout, stderr = self.connection.exec_command(command)
             lines = stdout.read().replace('\r', '').split('\n')
-            self.checkline(lines[0])
+
+            if not self.checkline(lines[0]):
+                self.err(3, command)
 
         except Exception:
             _, message = getexcept()
-            self.err(3, message)
+            self.err(4, message)
 
         finally:
             if status == 1:
@@ -277,7 +293,7 @@ class Router(ErrorObject):
                         results.append(line.strip())
 
         if not haslist(results) and hasstdout:
-            self.err(4)
+            self.err(5, command)
 
         return results
 
@@ -348,12 +364,15 @@ class Router(ErrorObject):
         command = ''
         commands = []
 
-        if self.branch[branch]['class'] == 'list':
-            if not hasstring(find):
-                self.err(4)
-                return None
+        if (self.branch[branch]['class'] == 'settings' or
+            (self.branch[branch]['class'] == 'list' and
+             find and find.find('=') < 1)):
+            for prop in properties:
+                commands.append('[' + branch + ' get ' + find + ' ' + prop + ']')
 
-        if self.branch[branch]['class'] == 'list' and find.find('=') > 1:
+            command = ':put (' + '.",".'.join(commands) + ')'
+
+        elif self.branch[branch]['class'] == 'list':
             if iid:
                 commands.append('$i')
 
@@ -364,11 +383,8 @@ class Router(ErrorObject):
                       + ' do={:put (' + '.",".'.join(commands) + ')}'
 
         else:
-            for prop in properties:
-                commands.append('[' + branch + ' get ' + find + ' ' + prop \
-                                + ']')
-
-            command = ':put (' + '.",".'.join(commands) + ')'
+            self.err(4, branch)
+            return None
 
         lines = self.command(command)
 
