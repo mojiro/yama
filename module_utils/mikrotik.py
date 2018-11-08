@@ -3,7 +3,7 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-"""   """
+"""YAMA: Module for mikrotik connections"""
 
 import re
 import stat
@@ -60,13 +60,20 @@ class Router(ErrorObject):
         else:
             self.err(3, username)
 
+        if pkeyfile:
+            if not isfile(pkeyfile):
+                self.err(4, pkeyfile)
+
+        self.password = password
+        self.pkeyfile = pkeyfile
+
         self.branch = readjson(branchfile)
         if not self.branch:
-            self.err(4, branchfile)
+            self.err(5, branchfile)
 
         self.inventory = mongodb.Database(db_conffile)
         if self.inventory.status < 0:
-            self.err(5, self.inventory.errors())
+            self.err(6, self.inventory.errors())
 
         if self.errc() == 0:
             self.status = 0
@@ -151,31 +158,29 @@ class Router(ErrorObject):
             if self.pkeyfile:
                 self.pkey = paramiko.RSAKey.from_private_key_file(self.pkeyfile)
 
-                if protocol == 'sftp':
-                    self.transport = paramiko.Transport((self.hostname, self.port))
+            if protocol == 'sftp':
+                self.transport = paramiko.Transport((self.hostname, self.port))
+
+                if self.pkey:
                     self.transport.connect(username=self.username,
                                            pkey=self.pkey)
-                    self.connection = paramiko.SFTPClient.from_transport(self.transport)
-
                 else:
-                    self.connection = paramiko.SSHClient()
-                    self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                    self.transport.connect(username=self.username,
+                                           password=self.password)
+
+                self.connection = paramiko.SFTPClient.from_transport(self.transport)
+
+            else:
+                self.connection = paramiko.SSHClient()
+                self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+                if self.pkey:
                     self.connection.connect(hostname=self.hostname,
                                             port=self.port,
                                             username=self.username,
                                             pkey=self.pkey,
                                             timeout=timeout)
-
-            else:
-                if protocol == 'sftp':
-                    self.transport = paramiko.Transport((self.hostname, self.port))
-                    self.transport.connect(username=self.username,
-                                           password=self.password)
-                    self.connection = paramiko.SFTPClient.from_transport(self.transport)
-
                 else:
-                    self.connection = paramiko.SSHClient()
-                    self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                     self.connection.connect(hostname=self.hostname,
                                             port=self.port,
                                             username=self.username,
@@ -365,8 +370,8 @@ class Router(ErrorObject):
         commands = []
 
         if (self.branch[branch]['class'] == 'settings' or
-            (self.branch[branch]['class'] == 'list' and
-             find and find.find('=') < 1)):
+                (self.branch[branch]['class'] == 'list' and
+                 find and find.find('=') < 1)):
             for prop in properties:
                 commands.append('[' + branch + ' get ' + find + ' ' + prop + ']')
 
