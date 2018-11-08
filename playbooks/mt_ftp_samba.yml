@@ -12,7 +12,7 @@
   tasks:
     - name: Mikrotik - Add USER GROUP
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -24,7 +24,7 @@
 
     - name: Mikrotik - Add USER
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -36,7 +36,7 @@
 
     - name: Mikrotik - Add IP ADDRESS
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -48,7 +48,7 @@
 
     - name: Mikrotik - Set IP SERVICE FTP
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -61,7 +61,7 @@
 
     - name: Mikrotik - Set IP SMB
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -73,7 +73,7 @@
 
     - name: Mikrotik - Add IP SMB SHARE
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -85,7 +85,7 @@
 
     - name: Mikrotik - Add IP SMB USER
       mt_set:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"

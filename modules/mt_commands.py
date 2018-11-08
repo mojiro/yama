@@ -21,7 +21,7 @@ def main():
     unreachable = 1
     module = AnsibleModule(
         argument_spec=dict(
-            hostname=dict(required=True),
+            host=dict(required=True),
             port=dict(required=False, type='int', default=22),
             username=dict(required=False, default='admin'),
             password=dict(required=False),
@@ -35,7 +35,7 @@ def main():
     )
 
     router = mikrotik.Router(
-        module.params['hostname'],
+        module.params['host'],
         module.params['port'],
         module.params['username'],
         module.params['password'],

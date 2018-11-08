@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from ansible.module_utils.network.mikrotik.object_error import ErrorObject
 from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, hasdict, \
-    ishost, isport, ishostname, isusername
+    ishost, isport, ishost, isusername
 from ansible.module_utils.network.mikrotik.strings import readjson
 
 
@@ -19,7 +19,7 @@ class Database(ErrorObject):
     """
     connection = None
     cmdb = None
-    hostname = '127.0.0.1'
+    host = '127.0.0.1'
     port = 27017
     username = None
     password = None
@@ -34,11 +34,11 @@ class Database(ErrorObject):
         contents = readjson(conffile)
 
         if hasdict(contents):
-            if 'hostname' in contents:
-                if ishost(contents['hostname']):
-                    self.hostname = contents['hostname']
+            if 'host' in contents:
+                if ishost(contents['host']):
+                    self.host = contents['host']
                 else:
-                    self.err(1, contents['hostname'])
+                    self.err(1, contents['host'])
 
             if 'port' in contents:
                 if isport(contents['port']):
@@ -98,7 +98,7 @@ class Database(ErrorObject):
                 return True
 
         try:
-            self.connection = MongoClient(self.hostname, self.port)
+            self.connection = MongoClient(self.host, self.port)
             self.cmdb = self.connection[self.name]
             self.status = 1
             return True
@@ -271,7 +271,7 @@ class Database(ErrorObject):
         results = {}
         status = 0
 
-        if not ishostname(host):
+        if not ishost(host):
             self.err(1)
             return {}
 
@@ -303,7 +303,7 @@ class Database(ErrorObject):
         results = False
         status = 0
 
-        if not ishostname(host):
+        if not ishost(host):
             return self.err(1)
 
         if self.status < 1 and connect:

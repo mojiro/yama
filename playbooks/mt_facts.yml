@@ -12,7 +12,7 @@
   tasks:
     - name: Mikrotik - Collect Facts - /system identity
       mt_facts:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
@@ -23,7 +23,7 @@
 
     - name: Mikrotik - Collect Facts - /system resources
       mt_facts:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"

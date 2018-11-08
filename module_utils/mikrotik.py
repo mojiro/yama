@@ -16,7 +16,7 @@ from ansible.module_utils.network.mikrotik.object_error import ErrorObject
 import ansible.module_utils.network.mikrotik.mongodb as mongodb
 from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, haslist, \
-    hasdict, haskey, isdir, isfile, isport, ishostname, isusername
+    hasdict, haskey, isdir, isfile, isport, ishost, isusername
 from ansible.module_utils.network.mikrotik.strings import readjson
 from ansible.module_utils.network.mikrotik.mikrotik_helpers import branchfix, \
     properties_to_list, propvals_to_dict, propvals_diff_getvalues
@@ -29,7 +29,7 @@ class Router(ErrorObject):
     transport = None
     connection = None
     pkey = None
-    hostname = None
+    host = None
     port = 22
     username = 'admin'
     password = None
@@ -38,17 +38,19 @@ class Router(ErrorObject):
 
     inventory = None
 
-    def __init__(self, hostname, port=22, username='admin', password='',
+    def __init__(self, host, port=22, username='admin', password='',
                  pkeyfile='', branchfile='config/branch.json',
                  db_conffile='config/mongodb.json'):
-        """
+        """Initializes a Router object
+
+        :param host: (str) Router's host. It can be IPv4, IPv6 or hostname.
         """
         super(Router, self).__init__()
 
-        if ishostname(hostname):
-            self.hostname = hostname
+        if ishost(host):
+            self.host = host
         else:
-            self.err(1, hostname)
+            self.err(1, host)
 
         if isport(port):
             self.port = int(port)
@@ -159,7 +161,7 @@ class Router(ErrorObject):
                 self.pkey = paramiko.RSAKey.from_private_key_file(self.pkeyfile)
 
             if protocol == 'sftp':
-                self.transport = paramiko.Transport((self.hostname, self.port))
+                self.transport = paramiko.Transport((self.host, self.port))
 
                 if self.pkey:
                     self.transport.connect(username=self.username,
@@ -175,13 +177,13 @@ class Router(ErrorObject):
                 self.connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
                 if self.pkey:
-                    self.connection.connect(hostname=self.hostname,
+                    self.connection.connect(hostname=self.host,
                                             port=self.port,
                                             username=self.username,
                                             pkey=self.pkey,
                                             timeout=timeout)
                 else:
-                    self.connection.connect(hostname=self.hostname,
+                    self.connection.connect(hostname=self.host,
                                             port=self.port,
                                             username=self.username,
                                             password=self.password,
@@ -242,7 +244,7 @@ class Router(ErrorObject):
         if not self.inventory.connect():
             return self.err(4, self.inventory.errors())
 
-        if not self.inventory.update('hosts', {'host': self.hostname},
+        if not self.inventory.update('hosts', {'host': self.host},
                                      'facts', {branch: propvals}):
             return self.err(5, self.inventory.errors())
 

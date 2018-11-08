@@ -20,7 +20,7 @@ def main():
     unreachable = 1
     module = AnsibleModule(
         argument_spec=dict(
-            hostname=dict(required=True),
+            host=dict(required=True),
             db_conffile=dict(required=False, default='mikrotik/mongodb.json')
         )
     )
@@ -30,7 +30,7 @@ def main():
     if inventory.connect():
         unreachable = 0
 
-        if inventory.addhost(module.params['hostname']):
+        if inventory.addhost(module.params['host']):
             changed = 1
 
     if inventory.errc():

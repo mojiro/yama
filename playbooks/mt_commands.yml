@@ -12,7 +12,7 @@
   tasks:
     - name: Mikrotik - Fotos
       mt_commands:
-        hostname:   "{{ inventory_hostname }}"
+        host:       "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
         pkeyfile:   "{{ mt_pkeyfile }}"
