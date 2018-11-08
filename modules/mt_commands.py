@@ -28,7 +28,7 @@ def main():
             pkeyfile=dict(required=False),
             branchfile=dict(required=False, default='mikrotik/branch.json'),
             db_conffile=dict(required=False, default='mikrotik/mongodb.json'),
-            commands=dict(required=True), #, type='list'),
+            commands=dict(required=True),  #, type='list'),
             raw=dict(required=False, default=False),
             output=dict(required=False)
         )

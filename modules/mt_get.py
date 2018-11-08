@@ -60,6 +60,7 @@ def main():
 
     router.disconnect()
     messages.append(router.errors())
+    messages.append(str(globals()))
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 

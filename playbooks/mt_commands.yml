@@ -11,7 +11,7 @@
 
   tasks:
     - name: Mikrotik - Fotos
-      mikrotik_ssh_commands:
+      mt_commands:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"

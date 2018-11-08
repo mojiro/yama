@@ -11,7 +11,7 @@
 
   tasks:
     - name: Mikrotik - Upload
-      mikrotik_sftp_upload:
+      mt_upload:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"

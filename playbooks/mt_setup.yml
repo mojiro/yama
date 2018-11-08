@@ -11,13 +11,13 @@
 
   tasks:
     - name: Mikrotik - Setup
-      mikrotik_setup:
+      mt_setup:
         hostname:   "{{ inventory_hostname }}"
       delegate_to: 127.0.0.1
       register: result
 
     - name: Mikrotik - Collect Facts - /system identity
-      mikrotik_ssh_facts:
+      mt_facts:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -28,7 +28,7 @@
       register: result
 
     - name: Mikrotik - Collect Facts - /system resources
-      mikrotik_ssh_facts:
+      mt_facts:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"

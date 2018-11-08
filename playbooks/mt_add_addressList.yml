@@ -11,7 +11,7 @@
 
   tasks:
     - name: Mikrotik - Set Value
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"

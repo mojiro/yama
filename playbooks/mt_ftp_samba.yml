@@ -11,7 +11,7 @@
 
   tasks:
     - name: Mikrotik - Add USER GROUP
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -23,7 +23,7 @@
       register: result
 
     - name: Mikrotik - Add USER
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -35,7 +35,7 @@
       register: result
 
     - name: Mikrotik - Add IP ADDRESS
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -47,7 +47,7 @@
       register: result
 
     - name: Mikrotik - Set IP SERVICE FTP
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -60,7 +60,7 @@
       register: result
 
     - name: Mikrotik - Set IP SMB
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -72,7 +72,7 @@
       register: result
 
     - name: Mikrotik - Add IP SMB SHARE
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
@@ -84,7 +84,7 @@
       register: result
 
     - name: Mikrotik - Add IP SMB USER
-      mikrotik_ssh_set:
+      mt_set:
         hostname:   "{{ inventory_hostname }}"
         port:       "{{ mt_port }}"
         username:   "{{ mt_username }}"
