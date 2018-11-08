@@ -11,10 +11,10 @@ from ansible.module_utils.network.mikrotik.exception import getexcept
 
 
 def hasstring(data):
-    """It validates that given input is a string with content
+    """It validates that given input is a string with content.
 
     :param data: (str) Input string
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not data:
         return False
@@ -26,10 +26,10 @@ def hasstring(data):
 
 
 def haslist(data):
-    """It validates that given input is a list with content
+    """It validates that given input is a list with content.
 
     :param data: (str) Input list
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not data:
         return False
@@ -39,10 +39,10 @@ def haslist(data):
 
 
 def hasdict(data):
-    """It validates that given input is a dictionary with content
+    """It validates that given input is a dictionary with content.
 
     :param data: (str) Input dictionary
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not data:
         return False
@@ -53,12 +53,12 @@ def hasdict(data):
 
 def haskey(data, key, instance=None):
     """It validates that given key exists in data dictionary but also it
-    contains data
+    contains data.
 
     :param data: (dict) Input dictionary
     :param key: (str) Key to be checked
     :param instance: (instance) Instance to check
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasdict(data):
         return False
@@ -76,11 +76,11 @@ def haskey(data, key, instance=None):
 
 def haskeys(data, keys):
     """It validates that given keys exist in data dictionary but also they
-    contain data
+    contain data.
 
     :param data: (dict) Input dictionary
     :param keys: (list) List of keys to be checked
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasdict(data):
         return False
@@ -95,10 +95,10 @@ def haskeys(data, keys):
 
 
 def isdir(data, makedirs=False):
-    """Directory validation and auto-creation
+    """Directory validation and auto-creation.
 
     :param data: (str) Directory
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -112,10 +112,10 @@ def isdir(data, makedirs=False):
 
 
 def isfile(data):
-    """File validation
+    """File validation.
 
     :param data: (str) Filename
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -123,10 +123,10 @@ def isfile(data):
 
 
 def ismacaddress(data):
-    """MAC Address validation
+    """MAC Address validation.
 
     :param data: (str) MAC Address
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -137,19 +137,19 @@ def ismacaddress(data):
 
 
 def isip(data):
-    """IP (v4/v6) Address validation
+    """IP (v4/v6) Address validation.
 
     :param data: (str) IP (v4/v6) Address
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     return isipv4(data) or isipv6(data)
 
 
 def isipv4(data):
-    """IPv4 Address validation
+    """IPv4 Address validation.
 
     :param data: (str) IPv4 Address
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -161,10 +161,10 @@ def isipv4(data):
 
 
 def isipv6(data):
-    """IPv6 Address validation
+    """IPv6 Address validation.
 
     :param data: (str) IPv6 Address
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -179,10 +179,10 @@ def isipv6(data):
 
 
 def ishostname(data):
-    """Hostname validation
+    """Hostname validation.
 
     :param data: (str) Hostname
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -195,19 +195,19 @@ def ishostname(data):
 
 
 def ishost(data):
-    """IP Address and Host validation
+    """IP Address and Host validation.
 
     :param data: (str) IP (v4/v6) Address or Hostname
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     return isip(data) or ishostname(data)
 
 
 def isport(data):
-    """TCP/UDP Port validation
+    """TCP/UDP Port validation.
 
     :param data: (int / long) Port
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not isinstance(data, (int, long)):
         try:
@@ -220,10 +220,10 @@ def isport(data):
 
 
 def isusername(data):
-    """Username validation
+    """Username validation.
 
     :param data: (str) Username
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False
@@ -234,10 +234,10 @@ def isusername(data):
 
 
 def isemail(data):
-    """Email validation
+    """Email validation.
 
     :param data: (str) Email
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not hasstring(data):
         return False

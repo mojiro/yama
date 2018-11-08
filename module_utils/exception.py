@@ -14,7 +14,7 @@ def getexcept(stderr=True):
     stdout.
 
     :param stderr: If it is True, will print the error message
-    :returns: False, error message
+    :return: False, error message
     """
 
     _, exc_obj, exc_tb = sys.exc_info()

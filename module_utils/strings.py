@@ -17,11 +17,11 @@ from ansible.module_utils.network.mikrotik.valid import hasstring, haslist, \
 
 
 def ifnull(data, payload=''):
-    """Equivalent to IFNULL of MySQL
+    """Equivalent to IFNULL of MySQL.
 
     :param data: Input to be checked
     :param payload: payload to return if input is empty
-    :returns: data or payload
+    :return: data or payload
     """
     if hasstring(data):
         return data
@@ -29,10 +29,10 @@ def ifnull(data, payload=''):
 
 
 def wtrim(data):
-    """Trim white space
+    """Trim white space.
 
     :param data: (str) Input to be trimmed
-    :returns: (str) The input trimmed
+    :return: (str) The input trimmed
     """
     if hasstring(data):
         return re.sub(r'\s+', ' ', data).strip()
@@ -40,11 +40,11 @@ def wtrim(data):
 
 
 def tofile(path, lines):
-    """Saves to file
+    """Saves lines to file.
 
     :param path: (str) File to write
     :param lines: (list) List of lines to write
-    :returns: (bool) True or False
+    :return: (bool) True or False
     """
     if not isdir('/'.join(path.split('/')[:-1]), True):
         return False
@@ -66,7 +66,7 @@ def csv_parse(lines):
 
     :param lines: (str / [str]) CSV input - it can either linefeeded string or
                                 list
-    :returns: ([str]) String Array or None on error
+    :return: ([str]) String Array or None on error
     """
     if not lines:
         return None
@@ -83,7 +83,7 @@ def csv_parse(lines):
 
 
 def readfile(filename):
-    """Read file from disk
+    """Read file from disk.
 
     :param filename: (str) Filename
     :return: (str) File contents, if fails returns None
@@ -100,7 +100,7 @@ def readfile(filename):
 
 
 def readjson(filename):
-    """Loads the JSON file into a dictionary
+    """Loads the JSON file into a dictionary.
 
     :param filename: (str) Filename to load JSON from
     :return: (dict) File contents in dict, None if fails

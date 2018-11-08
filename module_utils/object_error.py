@@ -14,16 +14,16 @@ class ErrorObject(object):
     messages = []
 
     def __init__(self):
-        """Init - Does nothing at the moment
+        """Init - Does nothing at the moment.
         """
         pass
 
     def err(self, code=0, message=''):
-        """The function that receives the errors
+        """The function that receives the errors.
 
         :param code: (int) Error ID
         :param message: (str) Message
-        :returns: (bool) False
+        :return: (bool) False
         """
         getframe_expr = 'sys._getframe({}).f_code.co_name'
         self.messages.append(eval(getframe_expr.format(2)) \
@@ -31,20 +31,23 @@ class ErrorObject(object):
         return False
 
     def err0(self):
-        """Empties the error list
-        :returns: (bool) True
+        """Empties the error list.
+
+        :return: (bool) True
         """
         self.messages = []
         return True
 
     def errc(self):
-        """Counts the number of errors
-        :returns: (int) Number of errors
+        """Counts the number of errors.
+
+        :return: (int) Number of errors
         """
         return len(self.messages)
 
     def errors(self):
-        """Prints the errors
-        :returns: (str) Concatenated string with all messages
+        """Prints the errors.
+        
+        :return: (str) Concatenated string with all messages
         """
         return '\n'.join(self.messages)

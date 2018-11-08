@@ -7,7 +7,6 @@
 """Unit tests"""
 
 import unittest
-
 import ansible.module_utils.network.mikrotik.valid as valid
 
 
