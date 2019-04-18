@@ -3,7 +3,7 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-"""Error Collector"""
+"""Error Collector <mdule_utils.object_error>"""
 
 import sys
 
