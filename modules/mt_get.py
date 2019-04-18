@@ -4,10 +4,10 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-""" Retrieves values from host. Optionally outputs the results to file. """
+"""Retrieves values from host. Optionally outputs the results to file."""
 
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.network.mikrotik.strings import tofile, ifnull
+from ansible.module_utils.network.mikrotik.strings import writefile, ifnull
 import ansible.module_utils.network.mikrotik.mikrotik as mikrotik
 
 PATH = '/etc/ansible/config'
@@ -52,7 +52,7 @@ def main():
                                   ifnull(module.params['find'], ''), True)
 
         if result and module.params['output']:
-            if not tofile(module.params['output'], result):
+            if not writefile(module.params['output'], result):
                 messages.append('Unable to create Output File.')
 
     if router.errc():

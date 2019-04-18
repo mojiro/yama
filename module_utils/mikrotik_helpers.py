@@ -6,16 +6,16 @@
 """Collection of helper functions for mikrotik module"""
 
 import re
-
 from ansible.module_utils.network.mikrotik.valid import hasstring, haslist, \
     hasdict, haskey
 from ansible.module_utils.network.mikrotik.strings import wtrim
 
+
 def branchfix(data):
     """Applies some fixes to branch part of the command.
 
-    :param data: (str) Branch
-    :return: Branch fixed
+    :param data: (str) Branch.
+    :return: Branch fixed.
     """
     if hasstring(data):
         return re.sub(r'\s\s+', ' ', data.strip()).replace('/ ', '/')
@@ -27,8 +27,8 @@ def exportfix(data):
     """Converts the multilined exported configuration of a router to single
     line.
 
-    :param data: (str) Exported configuration
-    :return: (str) Configuration
+    :param data: (str) Exported configuration.
+    :return: (str) Configuration.
     """
     if not haslist(data):
         return []
@@ -50,8 +50,8 @@ def exportfix(data):
 def properties_to_list(data):
     """Converts array of properties to list.
 
-    :param data: (str / list) List or Comma/Space seperated properties
-    :return: (list) List of properties
+    :param data: (str / list) List or Comma/Space seperated properties.
+    :return: (list) List of properties.
     """
     if haslist(data):
         return data
@@ -65,8 +65,8 @@ def properties_to_list(data):
 def propvals_to_dict(data):
     """Converts string pairs of properties and values to structured dictionary.
 
-    :param data: (str) Properties and values
-    :return: (dict) Structured dictionary
+    :param data: (str) Properties and values.
+    :return: (dict) Structured dictionary.
     """
     if not hasstring(data):
         return {}
@@ -87,8 +87,8 @@ def propvals_to_dict(data):
 def dict_to_propvals(data):
     """Converts structured dictionary into string.
 
-    :param data: (dict) Properties and values
-    :return: (str) String
+    :param data: (dict) Properties and values.
+    :return: (str) String.
     """
     if not hasdict(data):
         return ''
@@ -104,8 +104,8 @@ def dict_to_propvals(data):
 def valuefix(data):
     """Applies some fixes to values.
 
-    :param data: (str) Value input
-    :return: (str) Fixed value
+    :param data: (str) Value input.
+    :return: (str) Fixed value.
     """
 
     if data == 'yes':
@@ -116,12 +116,13 @@ def valuefix(data):
 
     return data
 
+
 def propvals_diff_getvalues(propvals, getvalues):
     """Compares two different sets of properties and values.
 
-    :param propvals: (dict) 1st set
-    :param getvalues: (dict) 2nd set
-    :return: (bool) True if they are same, False if not
+    :param propvals: (dict) 1st set.
+    :param getvalues: (dict) 2nd set.
+    :return: (bool) True if they are same, False if not.
     """
     if not hasdict(propvals):
         return None

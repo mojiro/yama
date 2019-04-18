@@ -47,7 +47,7 @@ class ErrorObject(object):
 
     def errors(self):
         """Prints the errors.
-        
+
         :return: (str) Concatenated string with all messages
         """
         return '\n'.join(self.messages)

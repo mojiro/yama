@@ -6,11 +6,10 @@
 """   """
 
 from pymongo import MongoClient
-
 from ansible.module_utils.network.mikrotik.object_error import ErrorObject
 from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, hasdict, \
-    ishost, isport, ishost, isusername
+    ishost, isport, isusername
 from ansible.module_utils.network.mikrotik.strings import readjson
 
 

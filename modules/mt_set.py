@@ -4,7 +4,7 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-""" Sets values to host """
+"""Sets values to host"""
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.network.mikrotik.strings import ifnull
