@@ -286,8 +286,8 @@ class Router(ErrorObject):
         if not self.inventory.connect():
             return self.err(4, self.inventory.errors())
 
-        if not self.inventory.update('hosts', {'host': self.host},
-                                     'facts', {branch: propvals}):
+        if not self.inventory.update('hosts', {'host': self.host}, 'facts',
+                                     {branch: propvals}):
             return self.err(5, self.inventory.errors())
 
         self.inventory.disconnect()
@@ -382,7 +382,7 @@ class Router(ErrorObject):
                         self.err0()
                         continue
 
-                return self.err(2, 'commands[' + str(index) + ']: ' + command)
+                return self.err(2, 'commands[{}]: {}'.format(index, command))
 
         if status == 1:
             self.disconnect()
@@ -439,19 +439,19 @@ class Router(ErrorObject):
                 (self.branch[branch]['class'] == 'list' and
                  find and find.find('=') < 1)):
             for prop in properties:
-                commands.append('[' + branch + ' get ' + find + ' ' + prop + ']')
+                commands.append('[{} get {} {}]'.format(branch, find, prop))
 
-            command = ':put (' + '.",".'.join(commands) + ')'
+            command = ':put ({})'.format('.",".'.join(commands))
 
         elif self.branch[branch]['class'] == 'list':
             if iid:
                 commands.append('$i')
 
             for prop in properties:
-                commands.append('[' + branch + ' get $i ' + prop + ']')
+                commands.append('[{} get $i {}]'.format(branch, prop))
 
-            command = ':foreach i in=[' + branch + ' find ' + find + ']' \
-                      + ' do={:put (' + '.",".'.join(commands) + ')}'
+            command = (':foreach i in=[' + branch + ' find ' + find + '] '
+                       'do={:put (' + '.",".'.join(commands) + ')}')
 
         else:
             self.err(4, branch)
@@ -530,7 +530,7 @@ class Router(ErrorObject):
         if self.branch[branch]['class'] == 'list':
             if hasstring(find):
                 if find.find('=') > 1:
-                    find_command = '[find ' + find + '] '
+                    find_command = '[find {}] '.format(find)
                 else:
                     iid = False
                     find_command = find + ' '
@@ -591,7 +591,7 @@ class Router(ErrorObject):
             return self.err(3)
 
         # Count entries before add command
-        command = ':put [:len [' + branch + ' find]]'
+        command = ':put [:len [{} find]]'.format(branch)
         entries_c0 = self.command(command)
         if not entries_c0:
             return self.err(4)
@@ -602,8 +602,8 @@ class Router(ErrorObject):
             prop = self.branch[branch]['id'][0]
 
             if haskey(propvals_d, prop):
-                command = ':put [:len [' + branch + ' find ' + prop + '=' \
-                          + propvals_d[prop] + ']]'
+                command = ':put [:len [{} find {}={}]]'.format(branch, prop,
+                                                               propvals_d[prop])
                 result = self.command(command)
 
                 if result[0] != '0':
@@ -620,7 +620,7 @@ class Router(ErrorObject):
             return self.err(6, results)
 
         # Count entries after add command
-        command = ':put [:len [' + branch + ' find]]'
+        command = ':put [:len [{} find]]'.format(branch)
         entries_c1 = self.command(command)
         if not entries_c1:
             return self.err(7)
@@ -661,19 +661,19 @@ class Router(ErrorObject):
             find = ''
 
         # Count entries before remove command
-        command = ':put [:len [' + branch + ' find]]'
+        command = ':put [:len [{} find]]'.format(branch)
         entries_c0 = self.command(command)
         if not entries_c0:
             return self.err(3)
 
         # Remove command
-        command = branch + ' remove [find ' + find + ']'
+        command = branch + ' remove [find {}]'.format(find)
         results = self.command(command, hasstdout=False)
         if results:
             return self.err(4, results)
 
         # Count entries after remove command
-        command = ':put [:len [' + branch + ' find]]'
+        command = ':put [:len [{} find]]'.format(branch)
         entries_c1 = self.command(command)
         if not entries_c1:
             return self.err(5)
