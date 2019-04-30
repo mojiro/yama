@@ -7,15 +7,16 @@
 """Unit tests"""
 
 import unittest
+
 import ansible.module_utils.network.mikrotik.valid as valid
 
 
 class valid_test(unittest.TestCase):
-    """Declaring unittest class for testing handled below
+    """Declaring unittest class for testing handled below.
     """
 
     def test_hasstring(self):
-        """Test if input is string
+        """Test if input is string.
         """
 
         none0 = None
@@ -49,7 +50,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.hasstring(tuple1))
 
     def test_haslist(self):
-        """Test if input is list
+        """Test if input is list.
         """
 
         none0 = None
@@ -83,7 +84,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.haslist(tuple1))
 
     def test_hasdict(self):
-        """Test if input is dictionary
+        """Test if input is dictionary.
         """
 
         none0 = None
@@ -117,7 +118,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.hasdict(tuple1))
 
     def test_haskey(self):
-        """Test if key exists in dictionary
+        """Test if key exists in dictionary.
         """
 
         none0 = None
@@ -153,11 +154,10 @@ class valid_test(unittest.TestCase):
 
         key0 = 'ab'
         self.assertTrue(valid.haskey(dict1, key0, str))  # assertTrue
-        self.assertFalse(valid.haskey(
-            dict1, key0, list))  # assertFalse
+        self.assertFalse(valid.haskey(dict1, key0, list))  # assertFalse
 
     def test_haskeys(self):
-        """Test if keys exist in dictionary
+        """Test if keys exist in dictionary.
         """
 
         none0 = None
@@ -192,11 +192,10 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.haskeys(dict1, tuple1))
 
         keys0 = ['ab']
-        self.assertTrue(valid.haskeys(
-            dict1, keys0))  # assertTrue
+        self.assertTrue(valid.haskeys(dict1, keys0))  # assertTrue
 
     def test_isdir(self):
-        """Test if input is directory
+        """Test if input is directory.
         """
 
         none0 = None
@@ -236,7 +235,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.isdir(directory1))
 
     def test_isfile(self):
-        """Test if input is directory
+        """Test if input is directory.
         """
 
         none0 = None
@@ -274,7 +273,7 @@ class valid_test(unittest.TestCase):
         self.assertTrue(valid.isfile(filename0))  # assertTrue
 
     def test_ismacaddress(self):
-        """Test if input is MAC Address
+        """Test if input is MAC Address.
         """
 
         none0 = None
@@ -324,7 +323,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.ismacaddress(mac6))
 
     def test_isipv4(self):
-        """Test if input is IPv4 Address
+        """Test if input is IPv4 Address.
         """
 
         none0 = None
@@ -376,7 +375,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.isipv4(ip7))
 
     def test_isipv6(self):
-        """Test if input is IPv6 Address
+        """Test if input is IPv6 Address.
         """
 
         none0 = None
@@ -422,7 +421,7 @@ class valid_test(unittest.TestCase):
         self.assertFalse(valid.isipv6(ip4))
 
     def test_ishostname(self):
-        """Test if input is hostname
+        """Test if input is hostname.
         """
 
         none0 = None

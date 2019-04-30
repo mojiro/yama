@@ -4,20 +4,21 @@
 # Copyright (c) 2018 Michail Topaloudis
 # GNU General Public License v3.0 (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
-"""Unit tests"""
+"""Unit tests for <module_utils.exception>
+"""
 
 import unittest
 import ansible.module_utils.network.mikrotik.exception as exception
 
 
 class exception_test(unittest.TestCase):
-    """Declaring unittest class for testing handled below
+    """Declaring unittest class for testing handled below.
     """
 
     def test_exception(self):
-        """Division by 0 to cause exception
+        """Tests the <getexcept>
+        Division by 0 to cause exception.
         """
-
         try_result = None
 
         int0 = 0

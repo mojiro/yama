@@ -7,11 +7,12 @@
 """Unit tests"""
 
 import unittest
+
 import ansible.module_utils.network.mikrotik.mikrotik_helpers as mikrotik_helpers
 
 
 class strings_test(unittest.TestCase):
-    """Declaring unittest class for testing handled below
+    """Declaring unittest class for testing handled below.
     """
 
     def test_properties_to_list(self):

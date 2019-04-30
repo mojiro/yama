@@ -7,15 +7,16 @@
 """Unit tests"""
 
 import unittest
+
 import ansible.module_utils.network.mikrotik.strings as strings
 
 
 class strings_test(unittest.TestCase):
-    """Declaring unittest class for testing handled below
+    """Declaring unittest class for testing handled below.
     """
 
     def test_ifnull(self):
-        """Test if data has content
+        """Test if data has content.
         """
 
         data_in0 = None
@@ -28,7 +29,7 @@ class strings_test(unittest.TestCase):
         self.assertEqual(strings.ifnull(data_in1, data_out1), data_out1)
 
     def test_wtrim(self):
-        """Test if input can get trimmed by whitespace
+        """Test if input can get trimmed by whitespace.
         """
 
         data_in0 = None
@@ -41,7 +42,7 @@ class strings_test(unittest.TestCase):
         self.assertEqual(strings.wtrim(data_in1), data_out1)
 
     def test_csv_parse(self):
-        """Test if input can be converted to CSV
+        """Test if input can be converted to CSV.
         """
 
         data_in0 = 'ab,cd,ef\ngh,ij,kl'
