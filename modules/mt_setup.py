@@ -20,8 +20,9 @@ def main():
     unreachable = 1
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(required=True),
-            db_conffile=dict(required=False, default='mikrotik/mongodb.json')
+            host=dict(required=True, type='str'),
+            db_conffile=dict(required=False, type='str',
+                             default='mikrotik/mongodb.json')
         )
     )
 

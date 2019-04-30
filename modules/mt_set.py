@@ -21,17 +21,19 @@ def main():
     unreachable = 1
     module = AnsibleModule(
         argument_spec=dict(
-            host=dict(required=True),
+            host=dict(required=True, type='str'),
             port=dict(required=False, type='int', default=22),
-            username=dict(required=False, default='admin'),
-            password=dict(required=False),
-            pkeyfile=dict(required=False),
-            branchfile=dict(required=False, default='mikrotik/branch.json'),
-            db_conffile=dict(required=False, default='mikrotik/mongodb.json'),
-            branch=dict(required=True),
-            action=dict(required=True),
-            propvals=dict(required=False),
-            find=dict(required=False)
+            username=dict(required=False, type='str', default='admin'),
+            password=dict(required=False, type='str'),
+            pkeyfile=dict(required=False, type='str'),
+            branchfile=dict(required=False, type='str',
+                            default='mikrotik/branch.json'),
+            db_conffile=dict(required=False, type='str',
+                            default='mikrotik/mongodb.json'),
+            branch=dict(required=True, type='str'),
+            action=dict(required=True, type='str'),
+            propvals=dict(required=False, type='str'),
+            find=dict(required=False, type='str')
         )
     )
 
