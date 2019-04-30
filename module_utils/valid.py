@@ -153,8 +153,8 @@ def isipv4(data):
     """
     if not hasstring(data):
         return False
-    regex = re.compile(r'^(([01]?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\.){3}([01]?[0'
-                       r'-9]{1,2}|2[0-4][0-9]|25[0-5])$')
+    regex = re.compile(r'^((25[0-5]|[01]?[0-9]{1,2}|2[0-4][0-9])\.){3}(25[0-5]'
+                       r'|[01]?[0-9]{1,2}|2[0-4][0-9])$')
     if regex.match(data):
         return True
     return False
