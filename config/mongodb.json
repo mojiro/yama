@@ -1,5 +1,5 @@
 {
-  "hostname": "192.168.250.14",
-  "port":     27017,
-  "name":     "ansible"
+  "host": "192.168.250.14",
+  "port": 27017,
+  "name": "ansible"
 }
