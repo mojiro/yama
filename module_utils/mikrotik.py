@@ -202,10 +202,14 @@ class Router(ErrorObject):
                                            pkey=self.pkey)
                 else:
                     self.transport.connect(username=self.username,
-                                           password=self.password)
+                                           password=self.password,
+                                           allow_agent=False,
+                                           look_for_keys=False)
 
                 self.connection = paramiko.SFTPClient.from_transport(
                     self.transport)
+                self.status = 1
+                return True
 
             else:
                 self.connection = paramiko.SSHClient()
@@ -223,30 +227,44 @@ class Router(ErrorObject):
                                             port=self.port,
                                             username=self.username,
                                             password=self.password,
-                                            timeout=timeout)
+                                            timeout=timeout,
+                                            allow_agent=False,
+                                            look_for_keys=False)
 
-            self.status = 1
-            return True
+                self.status = 1
+
+                # Try to run a Mikrotik CLI Command
+                command = '/system resource print'
+                results = self.command(command)
+
+                for line in results:
+                    if line == 'platform: MikroTik':
+                        return True
+
+                self.disconnect()
+                self.err(2, 'Host is not Mikrotik')
+
+            return False
 
         except socket.error:
             _, message = getexcept()
-            return self.err(2, message)
+            return self.err(3, message)
 
         except paramiko.AuthenticationException:
             _, message = getexcept()
-            return self.err(3, message)
+            return self.err(4, message)
 
         except paramiko.BadHostKeyException:
             _, message = getexcept()
-            return self.err(4, message)
+            return self.err(5, message)
 
         except paramiko.SSHException:
             _, message = getexcept()
-            return self.err(5, message)
+            return self.err(6, message)
 
         except Exception:
             _, message = getexcept()
-            return self.err(6, message)
+            return self.err(7, message)
 
     def disconnect(self):
         """Disconnects from current host, unless it is already disconnected.
@@ -316,6 +334,10 @@ class Router(ErrorObject):
         try:
             stdin, stdout, stderr = self.connection.exec_command(command)
             lines = stdout.read().replace('\r', '').split('\n')
+
+            # Mikrotik CLI is not producing stderr. Linux does.
+            if not (hasstring(lines) or haslist(lines)):
+                lines = stderr.read().replace('\r', '').split('\n')
 
             if not self.checkline(lines[0]):
                 self.err(3, command)
@@ -387,7 +409,7 @@ class Router(ErrorObject):
         if status == 1:
             self.disconnect()
 
-        return True
+        return results
 
     def getvalues(self, branch, properties, find='', csvout=False, iid=False):
         """Retrieves requested values from remote host.
