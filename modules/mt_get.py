@@ -29,9 +29,9 @@ def main():
             branchfile=dict(required=False, type='str',
                             default='mikrotik/branch.json'),
             db_conffile=dict(required=False, type='str',
-                            default='mikrotik/mongodb.json'),
+                             default='mikrotik/mongodb.json'),
             branch=dict(required=True, type='str'),
-            properties=dict(required=True, type='str'),
+            properties=dict(required=True),
             find=dict(required=False, type='str'),
             output=dict(required=False, type='str')
         )

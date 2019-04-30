@@ -30,8 +30,8 @@ def main():
                             default='mikrotik/branch.json'),
             db_conffile=dict(required=False, type='str',
                              default='mikrotik/mongodb.json'),
-            commands=dict(required=True, type='str'),  #, type='list'),
-            raw=dict(required=False, type='str', default=False),
+            commands=dict(required=True, type='list'),
+            raw=dict(required=False, type='bool', default=False),
             output=dict(required=False, type='str')
         )
     )
