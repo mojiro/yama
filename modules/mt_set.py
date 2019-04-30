@@ -29,7 +29,7 @@ def main():
             branchfile=dict(required=False, type='str',
                             default='mikrotik/branch.json'),
             db_conffile=dict(required=False, type='str',
-                            default='mikrotik/mongodb.json'),
+                             default='mikrotik/mongodb.json'),
             branch=dict(required=True, type='str'),
             action=dict(required=True, type='str'),
             propvals=dict(required=False, type='str'),
