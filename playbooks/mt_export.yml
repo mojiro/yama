@@ -16,7 +16,8 @@
         port:      "{{ mt_port }}"
         username:  "{{ mt_username }}"
         pkeyfile:  "{{ mt_pkeyfile }}"
-        command:   /export
+        commands:
+          - /export
         output:    /data/export/{{ inventory_hostname }}.rsc
         raw:       True
       delegate_to: 127.0.0.1
