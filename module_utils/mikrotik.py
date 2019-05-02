@@ -38,6 +38,35 @@ class Router(ErrorObject):
 
     inventory = None
 
+    # List of errors.
+    #
+    # Example:
+    # [admin@host] > ls -la
+    # bad command name ls (line 1 column 1)
+    errors = [
+        'bad command name',
+        'expected end of command',
+        'failure:',
+        'input does not match any value of',
+        'invalid value',
+        'no such item',
+        'Script Error:',
+        'syntax error'
+    ]
+
+    # Lines with 'exisits' are valid because of known typo in Mikrotik.
+    #
+    # Example:
+    # [admin@host] > /user add name=ftp password=ftp group=ftp
+    # failure: user with the same name already exisits
+    regexes = [
+        re.compile(r'failure: \S+ with the same \S+ already exisits'),
+        re.compile(r'failure: \S+ with the same \S+ already exists'),
+        re.compile(r'failure: \S+ already exisits'),
+        re.compile(r'failure: \S+ already exists'),
+        re.compile(r'failure: already have such \S+')
+    ]
+
     def __init__(self, host, port=22, username='admin', password='',
                  pkeyfile='', branchfile='config/branch.json',
                  db_conffile='config/mongodb.json'):
@@ -122,18 +151,7 @@ class Router(ErrorObject):
             return True
 
         data = data.strip()
-        errors = [
-            'bad command name',
-            'expected end of command',
-            'failure:',
-            'input does not match any value of',
-            'invalid value',
-            'no such item',
-            'Script Error:',
-            'syntax error'
-        ]
-
-        for index, error in enumerate(errors):
+        for index, error in enumerate(self.errors):
             if data.find(error) == 0:
                 return self.err(index, data)
 
@@ -148,22 +166,24 @@ class Router(ErrorObject):
         if not hasstring(data):
             return self.err(1)
 
-        # Lines with 'exisits' are valid because of known typo in Mikrotik.
-        #
-        # Example:
-        # admin@host] > /user add name=ftp password=ftp group=ftp
-        # failure: user with the same name already exisits
-        regexes = [
-            re.compile(r'failure: \S+ with the same \S+ already exisits'),
-            re.compile(r'failure: \S+ with the same \S+ already exists'),
-            re.compile(r'failure: \S+ already exisits'),
-            re.compile(r'failure: \S+ already exists'),
-            re.compile(r'failure: already have such \S+')
-        ]
-
-        for regex in regexes:
+        for regex in self.regexes:
             if regex.match(data):
                 return True
+
+        return False
+
+    def checkmikrotik(self):
+        """Executes a Mikrotik-only command to determine if host is a Mikrotik
+        device.
+        """
+        results = self.command('/system resource print')
+
+        for line in results:
+            if line == 'platform: MikroTik':
+                return True
+
+        self.disconnect()
+        self.err(2, 'Host is not Mikrotik')
 
         return False
 
@@ -232,17 +252,7 @@ class Router(ErrorObject):
                                             look_for_keys=False)
 
                 self.status = 1
-
-                # Try to run a Mikrotik CLI Command
-                command = '/system resource print'
-                results = self.command(command)
-
-                for line in results:
-                    if line == 'platform: MikroTik':
-                        return True
-
-                self.disconnect()
-                self.err(2, 'Host is not Mikrotik')
+                return checkmikrotik()
 
             return False
 
@@ -567,7 +577,7 @@ class Router(ErrorObject):
             return False   # There are no changes to apply
 
         # Update command
-        command = branch + ' set ' + find_command + propvals
+        command = '{} set {}{}'.format(branch, find_command, propvals)
         results = self.command(command, hasstdout=False)
         if results:
             self.err(6, command)
@@ -632,7 +642,7 @@ class Router(ErrorObject):
                     return False
 
         # Add Command
-        command = branch + ' add ' + propvals
+        command = '{} add {}'.format(branch, propvals)
         results = self.command(command, hasstdout=False)
         if results:
             if self.checkline_falsepos(results[0]):
@@ -689,7 +699,7 @@ class Router(ErrorObject):
             return self.err(3)
 
         # Remove command
-        command = branch + ' remove [find {}]'.format(find)
+        command = '{} remove [find {}]'.format(branch, find)
         results = self.command(command, hasstdout=False)
         if results:
             return self.err(4, results)
@@ -721,23 +731,23 @@ class Router(ErrorObject):
         path_c = len(path)
         index = 1
 
-        for index in range(0, path_c):
-            try:
+        try:
+            for index in range(0, path_c):
                 if stat.S_ISREG(
                         self.connection.stat(
                             '/'.join(path[0:index + 1])).st_mode):
                     return False
-            except IOError:
-                index -= 1
-                break
+        except IOError:
+            index -= 1
+            break
 
         if index < path_c - 1:
-            for index in range(index + 1, path_c):
-                try:
+            try:
+                for index in range(index + 1, path_c):
                     self.connection.mkdir('/'.join(path[0:index + 1]))
-                except IOError:
-                    _, message = getexcept()
-                    return self.err(1, message)
+            except IOError:
+                _, message = getexcept()
+                return self.err(1, message)
 
         return True
 
@@ -858,15 +868,14 @@ class Router(ErrorObject):
                 if not self.mkdir_remote(remote_dir):
                     return self.err(5, remote_dir)
 
-            for name in files:
-                remote_file = remote_root + '/' + name
-
-                try:
+            try:
+                for name in files:
+                    remote_file = remote_root + '/' + name
                     self.connection.put(root + '/' + name, remote_file)
-                except Exception:
-                    _, message = getexcept()
-                    self.err(6, remote_file)
-                    return self.err(7, message)
+            except Exception:
+                _, message = getexcept()
+                self.err(6, remote_file)
+                return self.err(7, message)
 
         return True
 
@@ -951,15 +960,14 @@ class Router(ErrorObject):
                 if not isdir(local_dir, True):
                     return self.err(5, local_dir)
 
-            for name in files:
-                local_file = local_root + '/' + name
-
-                try:
+            try:
+                for name in files:
+                    local_file = local_root + '/' + name
                     self.connection.get(root + '/' + name, local_file)
-                except Exception:
-                    _, message = getexcept()
-                    self.err(6, local_file)
-                    return self.err(7, message)
+            except Exception:
+                _, message = getexcept()
+                self.err(6, local_file)
+                return self.err(7, message)
 
         return True
 
