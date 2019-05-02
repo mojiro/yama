@@ -54,12 +54,14 @@ class Router(ErrorObject):
         'syntax error'
     ]
 
-    # Lines with 'exisits' are valid because of known typo in Mikrotik.
+    # List of messages with positive meaning.
     #
     # Example:
     # [admin@host] > /user add name=ftp password=ftp group=ftp
     # failure: user with the same name already exisits
-    regexes = [
+    #
+    # Lines with 'exisits' are valid because of known typo in Mikrotik.
+    message_regexes = [
         re.compile(r'failure: \S+ with the same \S+ already exisits'),
         re.compile(r'failure: \S+ with the same \S+ already exists'),
         re.compile(r'failure: \S+ already exisits'),
@@ -166,7 +168,7 @@ class Router(ErrorObject):
         if not hasstring(data):
             return self.err(1)
 
-        for regex in self.regexes:
+        for regex in self.message_regexes:
             if regex.match(data):
                 return True
 
@@ -183,7 +185,7 @@ class Router(ErrorObject):
                 return True
 
         self.disconnect()
-        self.err(2, 'Host is not Mikrotik')
+        self.err(1, 'Host is not Mikrotik')
 
         return False
 
@@ -195,7 +197,7 @@ class Router(ErrorObject):
         :return: (bool) Connection status.
         """
         if not isinstance(timeout, int) or timeout < 0:
-            timeout = 10
+            timeout = 30
 
         if self.status < 0:
             return self.err(1, self.status)
@@ -258,23 +260,23 @@ class Router(ErrorObject):
 
         except socket.error:
             _, message = getexcept()
-            return self.err(3, message)
+            return self.err(2, message)
 
         except paramiko.AuthenticationException:
             _, message = getexcept()
-            return self.err(4, message)
+            return self.err(3, message)
 
         except paramiko.BadHostKeyException:
             _, message = getexcept()
-            return self.err(5, message)
+            return self.err(4, message)
 
         except paramiko.SSHException:
             _, message = getexcept()
-            return self.err(6, message)
+            return self.err(5, message)
 
         except Exception:
             _, message = getexcept()
-            return self.err(7, message)
+            return self.err(6, message)
 
     def disconnect(self):
         """Disconnects from current host, unless it is already disconnected.
