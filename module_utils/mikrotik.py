@@ -6,44 +6,28 @@
 """YAMA: Module for mikrotik connections <module_utils.mikrotik>"""
 
 import re
-import stat
-import os
-import socket
 import csv
-import paramiko
-from ansible.module_utils.network.mikrotik.object_error import ErrorObject
+from ansible.module_utils.network.mikrotik.ssh_client import SSHClient
 import ansible.module_utils.network.mikrotik.mongodb as mongodb
-from ansible.module_utils.network.mikrotik.exception import getexcept
 from ansible.module_utils.network.mikrotik.valid import hasstring, haslist, \
-    hasdict, haskey, isdir, isfile, isport, ishost, isusername
+    hasdict, haskey
 from ansible.module_utils.network.mikrotik.strings import readjson
 from ansible.module_utils.network.mikrotik.mikrotik_helpers import branchfix, \
     properties_to_list, propvals_to_dict, propvals_diff_getvalues
 
 
-class Router(ErrorObject):
+class Router(SSHClient):
     """A class that will handle all router operations.
     """
-
     branch = None
-    transport = None
-    connection = None
-    pkey = None
-    host = None
-    port = 22
-    username = 'admin'
-    password = None
-    pkeyfile = None
-    status = -1 # -1 - Not ready, 0 - Disconnected/Ready, 1 - Connected
-
     inventory = None
 
-    # List of errors.
+    # List of Mikrotik errors.
     #
     # Example:
     # [admin@host] > ls -la
     # bad command name ls (line 1 column 1)
-    errors = [
+    message_errors = [
         'bad command name',
         'expected end of command',
         'failure:',
@@ -54,18 +38,16 @@ class Router(ErrorObject):
         'syntax error'
     ]
 
-    # List of messages with positive meaning.
+    # List of Mikrotik messages with positive meaning.
     #
     # Example:
     # [admin@host] > /user add name=ftp password=ftp group=ftp
     # failure: user with the same name already exisits
     #
-    # Lines with 'exisits' are valid because of known typo in Mikrotik.
+    # Lines with 'exisi?ts' are valid because of known typo in Mikrotik.
     message_regexes = [
-        re.compile(r'failure: \S+ with the same \S+ already exisits'),
-        re.compile(r'failure: \S+ with the same \S+ already exists'),
-        re.compile(r'failure: \S+ already exisits'),
-        re.compile(r'failure: \S+ already exists'),
+        re.compile(r'failure: \S+ with the same \S+ already exisi?ts'),
+        re.compile(r'failure: \S+ already exisi?ts'),
         re.compile(r'failure: already have such \S+')
     ]
 
@@ -84,33 +66,6 @@ class Router(ErrorObject):
         :param db_conffile: (file) Path of MongoDB Connection file.
         :return: (obj) Router.
         """
-        super(Router, self).__init__()
-
-        if ishost(host):
-            self.host = host
-        else:
-            self.err(1, host)
-
-        if isport(port):
-            self.port = int(port)
-        else:
-            self.err(2, port)
-
-        if isusername(username):
-            self.username = username
-        else:
-            self.err(3, username)
-
-        # There is no need to validate the existence of (password OR pkeyfile)
-        # because the router might have empty password and no public key set.
-
-        if pkeyfile:
-            if not isfile(pkeyfile):
-                self.err(4, pkeyfile)
-
-        self.password = password
-        self.pkeyfile = pkeyfile
-
         self.branch = readjson(branchfile)
         if not self.branch:
             self.err(5, branchfile)
@@ -119,29 +74,13 @@ class Router(ErrorObject):
         if self.inventory.status < 0:
             self.err(6, self.inventory.errors())
 
-        if self.errc() == 0:
-            self.status = 0
+        super(Router, self).__init__(host, port, username, password, pkeyfile)
 
     def __del__(self):
         """Closes open connections.
         """
-        self.disconnect()
         self.inventory.disconnect()
-
-    def checkconnection(self):
-        """Sends a single null command to check the connectivity.
-
-        :return: (bool) True on success, False on failure.
-        """
-        try:
-            transport = self.connection.get_transport()
-            transport.send_ignore()
-            self.status = 1
-            return True
-
-        except EOFError:
-            self.status = 0
-            return False
+        super(Router, self).__del__()
 
     def checkline(self, data=''):
         """Checks the input against a list of common errors.
@@ -153,14 +92,17 @@ class Router(ErrorObject):
             return True
 
         data = data.strip()
-        for index, error in enumerate(self.errors):
+        for index, error in enumerate(self.message_errors):
             if data.find(error) == 0:
+                if error == 'failure:':
+                    return self.checkline_falsepos(data)
                 return self.err(index, data)
 
         return True
 
     def checkline_falsepos(self, data=''):
-        """Checks false-positives.
+        """Checks false-positives. For error messages that begin with the word
+        'failure'.
 
         :param data: (str) Data to be checked.
         :return: (bool) True on success, False on failure.
@@ -185,115 +127,7 @@ class Router(ErrorObject):
                 return True
 
         self.disconnect()
-        self.err(1, 'Host is not Mikrotik')
-
-        return False
-
-    def connect(self, protocol='ssh', timeout=30):
-        """Connects to remote host using specified protocol.
-
-        :param ssh: (str) Protocol. Valid options: ssh, sftp.
-        :param timeout: (int) Connection timeout.
-        :return: (bool) Connection status.
-        """
-        if not isinstance(timeout, int) or timeout < 0:
-            timeout = 30
-
-        if self.status < 0:
-            return self.err(1, self.status)
-
-        if self.status == 1:
-            if self.checkconnection():
-                return True
-
-        try:
-            # There are four combinations:
-            # 1) SSH with password
-            # 2) SSH with private key
-            # 3) SFTP with password
-            # 4) SFTP with private key
-
-            if self.pkeyfile:
-                self.pkey = paramiko.RSAKey.from_private_key_file(self.pkeyfile)
-
-            if protocol == 'sftp':
-                self.transport = paramiko.Transport((self.host, self.port))
-
-                if self.pkey:
-                    self.transport.connect(username=self.username,
-                                           pkey=self.pkey)
-                else:
-                    self.transport.connect(username=self.username,
-                                           password=self.password,
-                                           allow_agent=False,
-                                           look_for_keys=False)
-
-                self.connection = paramiko.SFTPClient.from_transport(
-                    self.transport)
-                self.status = 1
-                return True
-
-            else:
-                self.connection = paramiko.SSHClient()
-                self.connection.set_missing_host_key_policy(
-                    paramiko.AutoAddPolicy())
-
-                if self.pkey:
-                    self.connection.connect(hostname=self.host,
-                                            port=self.port,
-                                            username=self.username,
-                                            pkey=self.pkey,
-                                            timeout=timeout)
-                else:
-                    self.connection.connect(hostname=self.host,
-                                            port=self.port,
-                                            username=self.username,
-                                            password=self.password,
-                                            timeout=timeout,
-                                            allow_agent=False,
-                                            look_for_keys=False)
-
-                self.status = 1
-                return checkmikrotik()
-
-            return False
-
-        except socket.error:
-            _, message = getexcept()
-            return self.err(2, message)
-
-        except paramiko.AuthenticationException:
-            _, message = getexcept()
-            return self.err(3, message)
-
-        except paramiko.BadHostKeyException:
-            _, message = getexcept()
-            return self.err(4, message)
-
-        except paramiko.SSHException:
-            _, message = getexcept()
-            return self.err(5, message)
-
-        except Exception:
-            _, message = getexcept()
-            return self.err(6, message)
-
-    def disconnect(self):
-        """Disconnects from current host, unless it is already disconnected.
-
-        :return: (bool) True on success, False on failure.
-        """
-        if not self.checkconnection:
-            return True
-
-        try:
-            self.connection.close()
-            self.status = 0
-            return True
-
-        except Exception:
-            _, message = getexcept()
-            return self.err(1, message)
+        return self.err(1, 'Host is not Mikrotik')
 
     def store(self, branch, propvals=None):
         """Stores information from <propvals> about current router to MongoDB.
@@ -325,63 +159,31 @@ class Router(ErrorObject):
         return True
 
     def command(self, command, raw=False, connect=True, hasstdout=True):
+        """Executes the <command> on the remote host and returns the results.
+
+        :param command: (str) The command that has to be executed.
+        :param raw: (bool) Returns all results without filtering lines that
+            start with #.
+        :param connect: (bool) Connects to host, if it is not connected already.
+        :param hasstdout: (bool) Is it expected the command to give output?
+        :return: (list) The execution result.
         """
-        """
-        status = 0
+        results = super(Router, self).command(command, raw, connect, hasstdout)
 
-        if not hasstring(command):
-            self.err(1)
-            return None
-
-        if self.status < 1 and connect:
-            if self.connect():
-                status = 1
-
-        if self.status < 1:
-            self.err(2, self.status)
-            return None
-
-        lines = []
-
-        try:
-            stdin, stdout, stderr = self.connection.exec_command(command)
-            lines = stdout.read().replace('\r', '').split('\n')
-
-            # Mikrotik CLI is not producing stderr. Linux does.
-            if not (hasstring(lines) or haslist(lines)):
-                lines = stderr.read().replace('\r', '').split('\n')
-
-            if not self.checkline(lines[0]):
-                self.err(3, command)
-
-        except Exception:
-            _, message = getexcept()
-            self.err(4, message)
-
-        finally:
-            if status == 1:
-                self.disconnect()
-        ##### fix the logic ^^^ \/\/\/\ of get/except/disconnect
-
-        results = []
-
-        if raw:
-            for line in lines:
-                results.append(line)
-
-        elif lines:
-            for line in lines:
-                if line:
-                    if line[0] != '#':
-                        results.append(line.strip())
-
-        if not haslist(results) and hasstdout:
+        if not self.checkline(results[0]):
             self.err(5, command)
 
         return results
 
     def commands(self, commands, raw=False, connect=True):
-        """
+        """Executes a list of command on the remote host using the
+        self.command() method.
+
+        :param commands: (list) The list of commands to be executed.
+        :param raw: (bool) Returns all results without filtering lines that
+            start with #.
+        :param connect: (bool) Connects to host, if it is not connected already.
+        :return: (list) The execution result.
         """
         status = 0
 
@@ -410,12 +212,6 @@ class Router(ErrorObject):
             results.append(result)
 
             if self.errc():
-                if haslist(result):
-                    # move the following check to self.command
-                    if self.checkline_falsepos(result[0]):
-                        self.err0()
-                        continue
-
                 return self.err(2, 'commands[{}]: {}'.format(index, command))
 
         if status == 1:
@@ -427,7 +223,8 @@ class Router(ErrorObject):
         """Retrieves requested values from remote host.
 
         :param branch: (str) Branch of commands.
-        :param properties: (str / list) List or Comma/Space seperated properties.
+        :param properties: (str / list) List or Comma / Space separated
+            properties.
         :param find: (str) Mikrotik CLI filter.
         :param csvout: (bool) Output in CSV File.
         :param iid: (bool) Adds $id to output.
@@ -716,289 +513,3 @@ class Router(ErrorObject):
         if entries_c0 != entries_c1:
             return True  # Changed
         return False  # Not changed != Failed
-
-    def mkdir_remote(self, data):
-        """Creates remote directories.
-
-        :param data: (str) Path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not hasstring(data):
-            return False
-
-        if data[-1] == '/':
-            data = data[:-1]
-
-        path = data.split('/')
-        path_c = len(path)
-        index = 1
-
-        try:
-            for index in range(0, path_c):
-                if stat.S_ISREG(
-                        self.connection.stat(
-                            '/'.join(path[0:index + 1])).st_mode):
-                    return False
-        except IOError:
-            index -= 1
-            break
-
-        if index < path_c - 1:
-            try:
-                for index in range(index + 1, path_c):
-                    self.connection.mkdir('/'.join(path[0:index + 1]))
-            except IOError:
-                _, message = getexcept()
-                return self.err(1, message)
-
-        return True
-
-    def isdir_remote(self, data, makedirs=False):
-        """Checks if remote directory exists.
-
-        :param data: (str) Path.
-        :param makedirs: (bool) If True, creates the whole path. Equilevant to
-            <mkdir -p>.
-        :return: (bool) True on success, False on failure.
-        """
-        if not hasstring(data):
-            return False
-
-        try:
-            return stat.S_ISDIR(self.connection.stat(data).st_mode)
-
-        except IOError:
-            if makedirs:
-                return self.mkdir_remote(data)
-
-    def isfile_remote(self, data):
-        """Checks if remote file exists.
-
-        :param data: (str) Path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not hasstring(data):
-            return False
-
-        try:
-            return stat.S_ISREG(self.connection.stat(data).st_mode)
-
-        except IOError:
-            return False
-
-    def walk_remote(self, data):
-        """Kindof a stripped down version of <os.walk>, implemented for SFTP.
-        Tried running it flat without the yields, but it really chokes on big
-        directories.
-
-        Source: https://gist.github.com/johnfink8/2190472#file-ssh-py-L92
-
-        :param data: (str) Path.
-        :return: (str) Path.
-        """
-        path = data
-        files = []
-        folders = []
-
-        for attr in self.connection.listdir_attr(data):
-            if stat.S_ISDIR(attr.st_mode):
-                folders.append(attr.filename)
-            else:
-                files.append(attr.filename)
-
-        yield path, folders, files
-
-        for folder in folders:
-            new_path = os.path.join(data, folder)
-
-            for x in self.walk_remote(new_path):
-                yield x
-
-    def upload(self, local, remote):
-        """Uploads local files or directories to remote host.
-
-        :param local: (str) Local path.
-        :param remote: (str) Remote path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not hasstring(remote):
-            return self.err(1)
-
-        if isfile(local):
-            return self.upload_file(local, remote)
-
-        if isdir(local):
-            return self.upload_dir(local, remote)
-
-        return False
-
-    def upload_dir(self, local, remote):
-        """Uploads local directories to remote host.
-
-        Source: https://www.tutorialspoint.com/python/os_walk.htm
-
-        :param local: (str) Local path.
-        :param remote: (str) Remote path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not isdir(local):
-            return self.err(1, local)
-
-        if self.isfile_remote(remote):
-            return self.err(2, remote)
-
-        if not self.isdir_remote(remote, True):
-            return self.err(3, remote)
-
-        if local[-1] == '/':
-            local = local[:-1]
-
-        if remote[-1] == '/':
-            remote = remote[:-1]
-
-        local_c = len(local)
-
-        for root, dirs, files in os.walk(local, topdown=False):
-            remote_root = remote + root[local_c:]
-
-            if not self.mkdir_remote(remote_root):
-                return self.err(4, remote_root)
-
-            for name in dirs:
-                remote_dir = remote_root + '/' + name
-
-                if not self.mkdir_remote(remote_dir):
-                    return self.err(5, remote_dir)
-
-            try:
-                for name in files:
-                    remote_file = remote_root + '/' + name
-                    self.connection.put(root + '/' + name, remote_file)
-            except Exception:
-                _, message = getexcept()
-                self.err(6, remote_file)
-                return self.err(7, message)
-
-        return True
-
-    def upload_file(self, local, remote):
-        """Uploads local files to remote host.
-
-        :param local: (str) Local path.
-        :param remote: (str) Remote path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not isfile(local):
-            return self.err(1, local)
-
-        if not hasstring(remote):
-            return self.err(2, remote)
-
-        if self.isdir_remote(remote) and remote[-1] != '/':
-            remote += '/'
-
-        if remote[-1] == '/':
-            remote += local.split('/')[-1]
-
-        if not self.isdir_remote('/'.join(remote.split('/')[:-1]), True):
-            return self.err(3, remote)
-
-        try:
-            self.connection.put(local, remote)
-            return True
-
-        except Exception:
-            _, message = getexcept()
-            return self.err(4, message)
-
-    def download(self, remote, local):
-        """Downloads remote files or directories to local path.
-
-        :param remote: (str) Remote path.
-        :param local: (str) Local path.
-        :return: (bool) True on success, False on failure.
-        """
-        if self.isdir_remote(remote):
-            return self.download_dir(remote, local)
-
-        if self.isfile_remote(remote):
-            return self.download_file(remote, local)
-
-        return False
-
-    def download_dir(self, remote, local):
-        """Downloads remote directories to local path.
-
-        :param remote: (str) Remote path.
-        :param local: (str) Local path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not self.isdir_remote(remote):
-            return self.err(1, remote)
-
-        if isfile(local):
-            return self.err(2, local)
-
-        if not isdir(local, True):
-            return self.err(3, local)
-
-        if remote[-1] == '/':
-            remote = remote[:-1]
-
-        if local[-1] == '/':
-            local = local[:-1]
-
-        remote_c = len(remote)
-
-        for root, dirs, files in self.walk_remote(remote):
-            local_root = local + root[remote_c:]
-
-            if not isdir(local_root, True):
-                return self.err(4, local_root)
-
-            for name in dirs:
-                local_dir = local_root + '/' + name
-
-                if not isdir(local_dir, True):
-                    return self.err(5, local_dir)
-
-            try:
-                for name in files:
-                    local_file = local_root + '/' + name
-                    self.connection.get(root + '/' + name, local_file)
-            except Exception:
-                _, message = getexcept()
-                self.err(6, local_file)
-                return self.err(7, message)
-
-        return True
-
-    def download_file(self, remote, local):
-        """Downloads remote files to local path.
-
-        :param remote: (str) Remote path.
-        :param local: (str) Local path.
-        :return: (bool) True on success, False on failure.
-        """
-        if not self.isfile_remote(remote):
-            return self.err(1, remote)
-
-        if not hasstring(local):
-            return self.err(2, local)
-
-        if isdir(local) and local[-1] != '/':
-            local += '/'
-
-        if local[-1] == '/':
-            local += remote.split('/')[:-1]
-
-        if not isdir('/'.join(local.split('/')[:-1]), True):
-            return self.err(3, local)
-
-        try:
-            self.connection.get(remote, local)
-            return True
-
-        except Exception:
-            _, message = getexcept()
-            return self.err(4, message)

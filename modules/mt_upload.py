@@ -7,9 +7,7 @@
 """   """
 
 from ansible.module_utils.basic import AnsibleModule
-import ansible.module_utils.network.mikrotik.mikrotik as mikrotik
-
-PATH = '/etc/ansible/config'
+import ansible.module_utils.network.mikrotik.sftp_client as sftp_client
 
 
 def main():
@@ -22,31 +20,27 @@ def main():
         argument_spec=dict(
             host=dict(required=True, type='str'),
             port=dict(required=False, type='int', default=22),
-            username=dict(required=False, type='str', default='admin'),
+            username=dict(required=False, type='str', default='root'),
             password=dict(required=False, type='str'),
             pkeyfile=dict(required=False, type='str'),
-            branchfile=dict(required=False, type='str',
-                            default='mikrotik/branch.json'),
-            db_conffile=dict(required=False, type='str',
-                             default='mikrotik/mongodb.json'),
             local=dict(required=True, type='str'),
             remote=dict(required=True, type='str')
         )
     )
 
-    router = mikrotik.Router(
+    router = mikrotik.sftp_client(
         module.params['host'],
         module.params['port'],
         module.params['username'],
         module.params['password'],
-        module.params['pkeyfile'],
-        PATH + '/' + module.params['branchfile'],
-        PATH + '/' + module.params['db_conffile']
+        module.params['pkeyfile']
     )
 
-    if router.connect('sftp'):
+    if router.connect():
         unreachable = 0
         result = router.upload(module.params['local'], module.params['remote'])
+
+        # Should check if files got "changed"
 
     if router.errc():
         failed = 1
