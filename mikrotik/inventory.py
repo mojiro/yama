@@ -7,7 +7,7 @@
 """   """
 
 import argparse
-from ansible.module_utils.network.mikrotik.valid import hasstring
+from ansible.module_utils.yama.valid import hasstring
 import ansible.module_utils.network.mikrotik.mongodb as mongodb
 
 CONFFILE = '/etc/ansible/config/mikrotik/mongodb.json'
