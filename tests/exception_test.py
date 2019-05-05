@@ -8,7 +8,7 @@
 """
 
 import unittest
-import ansible.module_utils.network.mikrotik.exception as exception
+import ansible.module_utils.yama.exception as exception
 
 
 class exception_test(unittest.TestCase):

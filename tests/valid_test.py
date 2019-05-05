@@ -8,7 +8,7 @@
 
 import unittest
 
-import ansible.module_utils.network.mikrotik.valid as valid
+import ansible.module_utils.yama.valid as valid
 
 
 class valid_test(unittest.TestCase):

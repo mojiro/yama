@@ -1,0 +1,26 @@
+---
+- name: SSH Commander
+  hosts: mt-smb
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:     56022
+    mt_username: itmanager
+    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Fotos
+      mt_commands:
+        host:     "{{ inventory_hostname }}"
+        port:     "{{ mt_port }}"
+        username: "{{ mt_username }}"
+        pkeyfile: "{{ mt_pkeyfile }}"
+        commands:
+          - /user group add name=ftp-read policy=ftp,read
+          - /user add name=anel password=anel group=ftp-read
+        output:   /data/output/{{ inventory_hostname }}.csv
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

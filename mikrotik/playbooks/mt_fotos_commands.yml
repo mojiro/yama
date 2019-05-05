@@ -1,0 +1,32 @@
+---
+- name: SSH Commander
+  hosts: mt-smb
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:     56022
+    mt_username: itmanager
+    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Fotos
+      mt_commands:
+        host:     "{{ inventory_hostname }}"
+        port:     "{{ mt_port }}"
+        username: "{{ mt_username }}"
+        pkeyfile: "{{ mt_pkeyfile }}"
+        commands:
+          - /user group add name=ftp-read policy=ftp,read
+          - /user add name=anel password=anel group=ftp-read
+          - /user group add name=ftp policy=ftp,read,write
+          - /user add name=fotos password=a1999 group=ftp
+          - /ip address add address=192.168.111.11 interface=br-local network=192.168.111.11
+          - /ip service set ftp address=192.168.0.0/16 port=56021 disabled=no
+          - /ip smb set domain=ANEL enabled=yes interfaces=br-local
+          - /ip smb shares add directory=/disk1/fotografies name=fotografies
+          - /ip smb users add name=anel password=anel read-only=yes
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

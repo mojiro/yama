@@ -8,7 +8,7 @@
 
 import unittest
 
-import ansible.module_utils.network.mikrotik.strings as strings
+import ansible.module_utils.yama.strings as strings
 
 
 class strings_test(unittest.TestCase):

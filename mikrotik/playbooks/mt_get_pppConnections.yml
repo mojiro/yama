@@ -1,0 +1,25 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:     56022
+    mt_username: itmanager
+    mt_password: 3728tak90
+    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Get PPP Connections
+      mt_get:
+        host:       "{{ inventory_hostname }}"
+        port:       "{{ mt_port }}"
+        username:   "{{ mt_username }}"
+        pkeyfile:   "{{ mt_pkeyfile }}"
+        branch:     /ppp active
+        properties: name service caller-id address
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result
