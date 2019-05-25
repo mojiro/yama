@@ -14,15 +14,15 @@ def main():
     messages = []
     result = []
     changed = 0
-    failed = 0
     unreachable = 1
+    failed = 0
     module = AnsibleModule(
         argument_spec=dict(
             host=dict(required=True, type='str'),
             port=dict(required=False, type='int', default=22),
             username=dict(required=False, type='str', default='root'),
             password=dict(required=False, type='str'),
-            pkeyfile=dict(required=False, type='str'),
+            pkey_file=dict(required=False, type='str'),
             local=dict(required=True, type='str'),
             remote=dict(required=True, type='str')
         )
@@ -33,7 +33,7 @@ def main():
         module.params['port'],
         module.params['username'],
         module.params['password'],
-        module.params['pkeyfile']
+        module.params['pkey_file']
     )
 
     if router.connect():

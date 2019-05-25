@@ -22,18 +22,18 @@ class SSHClient(ErrorObject):
     port = 22
     username = 'root'
     password = None
-    pkeyfile = None
+    pkey_file = None
     status = -1 # -1 - Not ready, 0 - Disconnected/Ready, 1 - Connected
 
     def __init__(self, host, port=22, username='root', password='',
-                 pkeyfile=''):
+                 pkey_file=''):
         """Initializes a SSHClient object.
 
         :param host: (str) Remote host. It can be IPv4, IPv6 or hostname.
         :param port: (int) SSH Port.
         :param username: (str) Username.
         :param password: (str) Password.
-        :param pkeyfile: (file) Private Key Path.
+        :param pkey_file: (file) Private Key Path.
         :return: (obj) SSH Client.
         """
         super(SSHClient, self).__init__()
@@ -53,15 +53,15 @@ class SSHClient(ErrorObject):
         else:
             self.err(3, username)
 
-        # There is no need to validate the existence of (password OR pkeyfile)
+        # There is no need to validate the existence of (password OR pkey_file)
         # because the router might have empty password and no public key set.
 
-        if pkeyfile:
-            if not isfile(pkeyfile):
-                self.err(4, pkeyfile)
+        if pkey_file:
+            if not isfile(pkey_file):
+                self.err(4, pkey_file)
 
         self.password = password
-        self.pkeyfile = pkeyfile
+        self.pkey_file = pkey_file
 
         if self.errc() == 0:
             self.status = 0
@@ -107,9 +107,9 @@ class SSHClient(ErrorObject):
                 return True
 
         try:
-            if self.pkeyfile:
+            if self.pkey_file:
                 self.pkey = paramiko.RSAKey.from_private_key_file(
-                    self.pkeyfile)
+                    self.pkey_file)
 
             self.connection = paramiko.SSHClient()
             self.connection.set_missing_host_key_policy(

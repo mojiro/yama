@@ -5,19 +5,19 @@
   strategy: free
 
   vars:
-    mt_port:     56022
-    mt_username: itmanager
-    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+    mt_port:      22
+    mt_username:  admin
+    mt_pkey_file: /home/admin/.ssh/id_rsa
 
   tasks:
     - name: Mikrotik - Upload
       sftp_download:
-        host:     "{{ inventory_hostname }}"
-        port:     "{{ mt_port }}"
-        username: "{{ mt_username }}"
-        pkeyfile: "{{ mt_pkeyfile }}"
-        remote:   /dir1/dir2/dir3/
-        local:    /data2
+        host:      "{{ inventory_hostname }}"
+        port:      "{{ mt_port }}"
+        username:  "{{ mt_username }}"
+        pkey_file: "{{ mt_pkey_file }}"
+        remote:    /dir1/dir2/dir3/
+        local:     /data2
       delegate_to: 127.0.0.1
       register: result
 

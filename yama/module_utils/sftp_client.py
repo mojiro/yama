@@ -42,9 +42,9 @@ class SFTPClient(SSHClient):
         # allow_agent=False, look_for_keys=False
 
         try:
-            if self.pkeyfile:
+            if self.pkey_file:
                 self.pkey = paramiko.RSAKey.from_private_key_file(
-                    self.pkeyfile)
+                    self.pkey_file)
 
             self.transport = paramiko.Transport((self.host, self.port))
 
