@@ -5,9 +5,9 @@
   strategy: free
 
   vars:
-    mt_port:     56022
-    mt_username: itmanager
-    mt_password: anemois2015
+    mt_port:     22
+    mt_username: root
+    mt_password: password
 
   tasks:
     - name: Mikrotik - Linux - Test

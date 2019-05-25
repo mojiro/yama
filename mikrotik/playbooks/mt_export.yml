@@ -5,17 +5,17 @@
   strategy: free
 
   vars:
-    mt_port:     56022
-    mt_username: itmanager
-    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+    mt_port:      22
+    mt_username:  admin
+    mt_pkey_file: /home/admin/.ssh/id_rsa
 
   tasks:
     - name: Mikrotik - Command
       mt_commands:
-        host:     "{{ inventory_hostname }}"
-        port:     "{{ mt_port }}"
-        username: "{{ mt_username }}"
-        pkeyfile: "{{ mt_pkeyfile }}"
+        host:      "{{ inventory_hostname }}"
+        port:      "{{ mt_port }}"
+        username:  "{{ mt_username }}"
+        pkey_file: "{{ mt_pkey_file }}"
         commands:
           - /export
         output:   /data/export/{{ inventory_hostname }}.rsc

@@ -16,17 +16,17 @@ def main():
     messages = []
     result = []
     changed = 0
-    failed = 0
     unreachable = 1
+    failed = 0
     module = AnsibleModule(
         argument_spec=dict(
             host=dict(required=True, type='str'),
-            db_conffile=dict(required=False, type='str',
-                             default='mikrotik/mongodb.json')
+            db_config_file=dict(required=False, type='str',
+                                default='mikrotik/mongodb.json')
         )
     )
 
-    inventory = mongodb.Database(PATH + '/' + module.params['db_conffile'])
+    inventory = mongodb.Database(PATH + '/' + module.params['db_config_file'])
 
     if inventory.connect():
         unreachable = 0

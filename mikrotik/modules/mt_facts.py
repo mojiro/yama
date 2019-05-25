@@ -17,19 +17,19 @@ def main():
     messages = []
     result = []
     changed = 0
-    failed = 0
     unreachable = 1
+    failed = 0
     module = AnsibleModule(
         argument_spec=dict(
             host=dict(required=True, type='str'),
             port=dict(required=False, type='int', default=22),
             username=dict(required=False, type='str', default='admin'),
             password=dict(required=False, type='str'),
-            pkeyfile=dict(required=False, type='str'),
-            branchfile=dict(required=False, type='str',
-                            default='mikrotik/branch.json'),
-            db_conffile=dict(required=False, type='str',
-                             default='mikrotik/mongodb.json'),
+            pkey_file=dict(required=False, type='str'),
+            branch_file=dict(required=False, type='str',
+                             default='mikrotik/branch.json'),
+            db_config_file=dict(required=False, type='str',
+                                default='mikrotik/mongodb.json'),
             branch=dict(required=True, type='str'),
             properties=dict(required=True),
             find=dict(required=False, type='str')
@@ -41,9 +41,9 @@ def main():
         module.params['port'],
         module.params['username'],
         module.params['password'],
-        module.params['pkeyfile'],
-        PATH + '/' + module.params['branchfile'],
-        PATH + '/' + module.params['db_conffile']
+        module.params['pkey_file'],
+        PATH + '/' + module.params['branch_file'],
+        PATH + '/' + module.params['db_config_file']
     )
 
     if router.connect():

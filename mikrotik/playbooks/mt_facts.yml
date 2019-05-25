@@ -5,19 +5,19 @@
   strategy: free
 
   vars:
-    mt_port:     56022
-    mt_username: itmanager
-    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+    mt_port:      22
+    mt_username:  admin
+    mt_pkey_file: /home/admin/.ssh/id_rsa
 
   tasks:
     - name: Mikrotik - Collect Facts - /system identity
       mt_facts:
-        host:       "{{ inventory_hostname }}"
-        port:       "{{ mt_port }}"
-        username:   "{{ mt_username }}"
-        pkeyfile:   "{{ mt_pkeyfile }}"
-        branch:     /system identity
-        properties: name
+        host:        "{{ inventory_hostname }}"
+        port:        "{{ mt_port }}"
+        username:    "{{ mt_username }}"
+        pkey_file:   "{{ mt_pkey_file }}"
+        branch:      /system identity
+        properties:  name
       delegate_to: 127.0.0.1
       register: result
 
@@ -25,12 +25,12 @@
 
     - name: Mikrotik - Collect Facts - /system resources
       mt_facts:
-        host:       "{{ inventory_hostname }}"
-        port:       "{{ mt_port }}"
-        username:   "{{ mt_username }}"
-        pkeyfile:   "{{ mt_pkeyfile }}"
-        branch:     /system resource
-        properties: version cpu cpu-count cpu-frequency write-sect-total bad-blocks architecture-name board-name
+        host:        "{{ inventory_hostname }}"
+        port:        "{{ mt_port }}"
+        username:    "{{ mt_username }}"
+        pkey_file:   "{{ mt_pkey_file }}"
+        branch:      /system resource
+        properties:  version cpu cpu-count cpu-frequency write-sect-total bad-blocks architecture-name board-name
       delegate_to: 127.0.0.1
       register: result
 

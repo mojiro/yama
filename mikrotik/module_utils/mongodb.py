@@ -8,8 +8,7 @@
 from pymongo import MongoClient
 from ansible.module_utils.yama.object_error import ErrorObject
 from ansible.module_utils.yama.exception import getexcept
-from ansible.module_utils.yama.valid import hasstring, hasdict, ishost, \
-    isport, isusername
+from ansible.module_utils.yama.valid import hasstring, hasdict, ishost, isport
 from ansible.module_utils.yama.strings import readjson
 
 
@@ -18,50 +17,39 @@ class Database(ErrorObject):
     """
     connection = None
     cmdb = None
-    host = '127.0.0.1'
-    port = 27017
-    username = None
-    password = None
-    name = 'ansible'
+    config = {
+      'host': '127.0.0.1',
+      'port': 27017,
+      'database': 'ansible',
+      'username': None,
+      'password': None
+    }
     status = -1 # -1 - Not ready, 0 - Disconnected/Ready, 1 - Connected
 
-    def __init__(self, conffile='config/mongodb.json'):
+    def __init__(self, config_file='config/mongodb.json'):
         """
         """
         super(Database, self).__init__()
 
-        contents = readjson(conffile)
+        config_new = readjson(config_file)
 
-        if hasdict(contents):
-            if 'host' in contents:
-                if ishost(contents['host']):
-                    self.host = contents['host']
-                else:
-                    self.err(1, contents['host'])
+        if hasdict(config_new):
+            config.update(config_new)
 
-            if 'port' in contents:
-                if isport(contents['port']):
-                    self.port = contents['port']
-                else:
-                    self.err(2, contents['port'])
+        if not ishost(config['host']):
+            self.err(1, config['host'])
 
-            if 'username' in contents:
-                if isusername(contents['username']):
-                    self.username = contents['username']
-                else:
-                    self.err(3, contents['username'])
+        if not isport(config['port']):
+            self.err(2, config['port'])
 
-            if 'password' in contents:
-                if hasstring(contents['password']):
-                    self.password = contents['password']
-                else:
-                    self.err(4, contents['password'])
+        if hasstring(config['username']):
+            self.err(3, config['username'])
 
-            if 'name' in contents:
-                if hasstring(contents['name']):
-                    self.name = contents['name']
-                else:
-                    self.err(5, contents['name'])
+        if not hasstring(config['password']):
+            self.err(4, config['password'])
+
+        if not hasstring(config['database']):
+            self.err(5, config['database'])
 
         if self.errc() == 0:
             self.status = 0
@@ -97,8 +85,9 @@ class Database(ErrorObject):
                 return True
 
         try:
-            self.connection = MongoClient(self.host, self.port)
-            self.cmdb = self.connection[self.name]
+            self.connection = MongoClient(self.config['host'],
+                                          self.config['port'])
+            self.cmdb = self.connection[self.config['database']]
             self.status = 1
             return True
 

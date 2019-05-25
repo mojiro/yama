@@ -5,20 +5,20 @@
   strategy: free
 
   vars:
-    mt_port:     56022
-    mt_username: itmanager
-    mt_password: 3728tak90
-    mt_pkeyfile: /home/itmanager/.ssh/id_rsa
+    mt_port:      22
+    mt_username:  admin
+    mt_password:  password
+    mt_pkey_file: /home/admin/.ssh/id_rsa
 
   tasks:
     - name: Mikrotik - Get PPP Connections
       mt_get:
-        host:       "{{ inventory_hostname }}"
-        port:       "{{ mt_port }}"
-        username:   "{{ mt_username }}"
-        pkeyfile:   "{{ mt_pkeyfile }}"
-        branch:     /ppp active
-        properties: name service caller-id address
+        host:        "{{ inventory_hostname }}"
+        port:        "{{ mt_port }}"
+        username:    "{{ mt_username }}"
+        pkey_file:   "{{ mt_pkey_file }}"
+        branch:      /ppp active
+        properties:  name service caller-id address
       delegate_to: 127.0.0.1
       register: result
 

@@ -51,29 +51,29 @@ class Router(SSHClient):
     ]
 
     def __init__(self, host, port=22, username='admin', password='',
-                 pkeyfile='', branchfile='config/branch.json',
-                 db_conffile='config/mongodb.json'):
+                 pkey_file='', branch_file='config/branch.json',
+                 db_config_file='config/mongodb.json'):
         """Initializes a Router object.
 
         :param host: (str) Router's host. It can be IPv4, IPv6 or hostname.
         :param port: (int) SSH Port.
         :param username: (str) Username.
         :param password: (str) Password.
-        :param pkeyfile: (file) Private Key Path.
-        :param branchfile: (file) Path of branch.json. Directory of Mikrotik
+        :param pkey_file: (file) Private Key Path.
+        :param branch_file: (file) Path of branch.json. Directory of Mikrotik
             commands.
-        :param db_conffile: (file) Path of MongoDB Connection file.
+        :param db_config_file: (file) Path of MongoDB Connection file.
         :return: (obj) Router.
         """
-        self.branch = readjson(branchfile)
+        self.branch = readjson(branch_file)
         if not self.branch:
-            self.err(5, branchfile)
+            self.err(5, branch_file)
 
-        self.inventory = mongodb.Database(db_conffile)
+        self.inventory = mongodb.Database(db_config_file)
         if self.inventory.status < 0:
             self.err(6, self.inventory.errors())
 
-        super(Router, self).__init__(host, port, username, password, pkeyfile)
+        super(Router, self).__init__(host, port, username, password, pkey_file)
 
     def __del__(self):
         """Closes open connections.
