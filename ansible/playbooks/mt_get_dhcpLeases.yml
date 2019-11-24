@@ -1,0 +1,41 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:      22
+    mt_username:  admin
+    mt_password:  password
+    mt_pkey_file: /home/admin/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Get Value
+      mt_get:
+        host:        "{{ inventory_hostname }}"
+        port:        "{{ mt_port }}"
+        username:    "{{ mt_username }}"
+        pkey_file:   "{{ mt_pkey_file }}"
+        branch:      /ip dhcp-server lease
+        properties:  address mac-address address-list disabled dynamic comment
+        output:      /data/output/{{ inventory_hostname }}.csv
+        format:      csv
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result
+
+    - name: Mikrotik - Get FTP
+      mt_get:
+        host:        "{{ inventory_hostname }}"
+        port:        "{{ mt_port }}"
+        username:    "{{ mt_username }}"
+        pkey_file:   "{{ mt_pkey_file }}"
+        branch:      /ip service
+        find:        ftp
+        properties:  disabled,address
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

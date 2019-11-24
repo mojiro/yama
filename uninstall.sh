@@ -8,12 +8,8 @@
 ANSIBLE_ETC='/etc/ansible'
 ANSIBLE_DIR='/usr/lib/python2.7/dist-packages/ansible'
 
-rm -f "${ANSIBLE_ETC}/inventory.py"
-rm -f "${ANSIBLE_ETC}/config/mikrotik"
-rm -f "${ANSIBLE_ETC}/playbooks/mikrotik"
+rm -f "${ANSIBLE_ETC}/config/yama"
+rm -f "${ANSIBLE_ETC}/playbooks/yama"
 
-rm -f "${ANSIBLE_DIR}/modules/network/mikrotik"
-rm -f "${ANSIBLE_DIR}/module_utils/network/mikrotik"
-
-rm -f "${ANSIBLE_DIR}/modules/utilities/yama"
-rm -f "${ANSIBLE_DIR}/module_utils/yama"
+rm -f "${ANSIBLE_DIR}/modules/remote_management/yama"
+rm -f "${ANSIBLE_DIR}/module_utils/remote_management/yama"

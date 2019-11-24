@@ -1,0 +1,26 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:      22
+    mt_username:  admin
+    mt_password:  password
+    mt_pkey_file: /home/admin/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Set Value
+      mt_set:
+        host:      "{{ inventory_hostname }}"
+        port:      "{{ mt_port }}"
+        username:  "{{ mt_username }}"
+        pkey_file: "{{ mt_pkey_file }}"
+        branch:    /ip firewall address-list
+        action:    remove
+        find:      list=ntp-servers address=192.168.1.2
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

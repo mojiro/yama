@@ -12,12 +12,8 @@ PROJECT_DIR=`pwd`
 mkdir -p "${ANSIBLE_ETC}/config"
 mkdir -p "${ANSIBLE_ETC}/playbooks"
 
-ln -s "${PROJECT_DIR}/mikrotik/inventory.py" "${ANSIBLE_ETC}/inventory.py"
-ln -s "${PROJECT_DIR}/mikrotik/config"       "${ANSIBLE_ETC}/config/mikrotik"
-ln -s "${PROJECT_DIR}/mikrotik/playbooks"    "${ANSIBLE_ETC}/playbooks/mikrotik"
+ln -s "${PROJECT_DIR}/ansible/config"       "${ANSIBLE_ETC}/config/yama"
+ln -s "${PROJECT_DIR}/ansible/playbooks"    "${ANSIBLE_ETC}/playbooks/yama"
 
-ln -s "${PROJECT_DIR}/mikrotik/modules"      "${ANSIBLE_DIR}/modules/network/mikrotik"
-ln -s "${PROJECT_DIR}/mikrotik/module_utils" "${ANSIBLE_DIR}/module_utils/network/mikrotik"
-
-ln -s "${PROJECT_DIR}/yama/modules"          "${ANSIBLE_DIR}/modules/utilities/yama"
-ln -s "${PROJECT_DIR}/yama/module_utils"     "${ANSIBLE_DIR}/module_utils/yama"
+ln -s "${PROJECT_DIR}/ansible/modules"      "${ANSIBLE_DIR}/modules/remote_management/yama"
+ln -s "${PROJECT_DIR}/ansible/module_utils" "${ANSIBLE_DIR}/module_utils/remote_management/yama"

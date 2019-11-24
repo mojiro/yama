@@ -16,7 +16,6 @@ acting like an API.
 ## Supported Operations
 - Command Execution with tracking (changed, failed)
 - SFTP Recursive Upload/Download
-- Fact saving at MongoDB
 
 ## Documentation
 Documentation, currently is limited in the example playbooks. At some point, I

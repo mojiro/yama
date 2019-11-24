@@ -1,0 +1,26 @@
+---
+- name: SSH Commander
+  hosts: mt-linux-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:      22
+    mt_username:  root
+    mt_password:  password
+    mt_pkey_file: /root/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Linux - Test
+      mt_commands:
+        host:     "{{ inventory_hostname }}"
+        port:     "{{ mt_port }}"
+        username: "{{ mt_username }}"
+        password: "{{ mt_password }}"
+        raw:      true
+        commands:
+          - /interface print
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result

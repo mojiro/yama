@@ -1,0 +1,27 @@
+---
+- name: SSH Commander
+  hosts: mt-test
+  gather_facts: no
+  strategy: free
+
+  vars:
+    mt_port:      22
+    mt_username:  admin
+    mt_password:  password
+    mt_pkey_file: /home/admin/.ssh/id_rsa
+
+  tasks:
+    - name: Mikrotik - Command
+      mt_commands:
+        host:      "{{ inventory_hostname }}"
+        port:      "{{ mt_port }}"
+        username:  "{{ mt_username }}"
+        pkey_file: "{{ mt_pkey_file }}"
+        commands:
+          - /export
+        output:   /data/export/{{ inventory_hostname }}.rsc
+        raw:      True
+      delegate_to: 127.0.0.1
+      register: result
+
+    - debug: var=result
