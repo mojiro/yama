@@ -1,6 +1,6 @@
 ---
 - name: SSH Commander
-  hosts: mt-smb
+  hosts: mt-test
   gather_facts: no
   strategy: free
 

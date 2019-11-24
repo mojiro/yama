@@ -64,7 +64,7 @@ def main():
 
         if result:
             if module.params['output']:
-                if not writefile(module.params['output'], result):
+                if not writefile(module.params['output'], result[0]):
                     messages.append('Unable to create Output File.')
 
     if device.errc():
@@ -72,7 +72,6 @@ def main():
 
     device.disconnect()
     messages.append(device.errors())
-    messages.append(str(globals()))
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 

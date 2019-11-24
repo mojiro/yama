@@ -52,7 +52,6 @@ def main():
 
     device.disconnect()
     messages.append(device.errors())
-    messages.append(str(globals()))
     module.exit_json(changed=changed, unreachable=unreachable, failed=failed,
                      result=result, msg=' '.join(messages))
 
